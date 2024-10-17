@@ -1,0 +1,15 @@
+.course-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .course-title {
+    font-weight: bold;
+  }
+  
+  .faculty-name {
+    margin-left: 10px;
+    color: grey;
+  }
+  

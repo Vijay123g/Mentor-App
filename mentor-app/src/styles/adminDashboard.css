@@ -1,0 +1,240 @@
+.sidenav {
+    width: 250px;
+    height: 100vh;
+    background-color: #3f51b5;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  
+    mat-nav-list {
+      display: flex;
+      flex-direction: column;
+    }
+  
+    .mat-list-item {
+      width: 100%;
+      color: #ffffff;
+      margin-bottom: 10px;
+      font-weight: bold;
+  
+      &:hover {
+        background-color: #536dfe; 
+        border-radius: 4px;
+      }
+    }
+  }
+  
+  
+  .mat-sidenav-content {
+    flex-grow: 1;
+    background-color: #f4f6f9;
+    padding: 20px;
+  }
+  
+  .main-content {
+    flex-grow: 1;
+    padding: 20px;
+    background-color: #ffffff;
+  }
+  
+  .dashboard-summary {
+    padding: 20px;
+    background-color: #f9f9f9;
+  
+    h2 {
+      font-size: 1.8rem;
+      color: #343a40;
+      margin-bottom: 20px;
+    }
+  
+    .stats {
+      display: flex;
+      justify-content: space-around;
+      gap: 40px;
+      margin-top: 20px; 
+  
+      .stat-card {
+        background: #ffffff;
+        border: 1px solid #3f51b5; 
+        border-radius: 12px;
+        padding: 30px;
+        width: 25%; 
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        transition: transform 0.3s;
+  
+        &:hover {
+          transform: translateY(-5px);
+        }
+  
+        h3 {
+          font-size: 1.2rem;
+          color: #3f51b5;
+          margin-bottom: 10px;
+        }
+  
+        p {
+          font-size: 2rem;
+          font-weight: bold;
+          color: #007bff;
+        }
+      }
+    }
+  }
+  
+  .add-faculty-form {
+    max-width: 500px;
+    margin: 0 auto;
+  
+    mat-form-field {
+      width: 100%;
+    }
+  
+    h2 {
+      margin-bottom: 20px;
+    }
+  
+    button {
+      width: 100%;
+      margin-top: 20px;
+    }
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  table, th, td {
+    border: 1px solid black;
+  }
+  
+  th, td {
+    padding: 8px;
+    text-align: center;
+  }
+
+    
+    .dashboard-summary {
+      padding: 20px;
+      background-color: #f9f9f9;
+    
+      h2 {
+        font-size: 1.8rem;
+        color: #343a40;
+        margin-bottom: 20px;
+      }
+    
+      .stats {
+        display: flex;
+        justify-content: space-around;
+    
+        .stat-card {
+          background: #fff;
+          border: 1px solid #e0e0e0;
+          border-radius: 8px;
+          padding: 20px;
+          width: 30%;
+          box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+          text-align: center;
+    
+          h3 {
+            font-size: 1.2rem;
+            color: #555;
+          }
+    
+          p {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #007bff;
+          }
+        }
+      }
+    }
+    
+    .faculty-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+    
+    .faculty-card {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      padding: 15px;
+      text-align: center;
+      background-color: #fff;
+      transition: transform 0.2s;
+    }
+    
+    .faculty-card:hover {
+      transform: scale(1.05);
+    }
+    
+    .faculty-photo {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 4px;
+    }
+    
+    .faculty-details {
+      margin-top: 10px;
+    }
+    
+    .faculty-details h3 {
+      font-size: 18px;
+      margin: 10px 0 5px;
+    }
+    
+    .faculty-details p {
+      font-size: 14px;
+      margin: 5px 0;
+    }
+    
+    .faculty-icons {
+      display: flex;
+      justify-content: center;
+      margin-top: 10px;
+    }
+    
+    .icon {
+      margin: 0 10px;
+      font-size: 20px;
+      color: #007bff;
+      transition: color 0.3s;
+    }
+    
+    .icon:hover {
+      color: #0056b3;
+    }
+    
+    .pagination {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    
+    .pagination button {
+      padding: 10px 20px;
+      margin: 0 5px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    
+    .pagination button:disabled {
+      background-color: #ddd;
+    }
+    
+    .pagination span {
+      line-height: 40px;
+      margin: 0 10px;
+    }
+    
