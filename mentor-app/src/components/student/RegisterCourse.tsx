@@ -20,8 +20,10 @@ const RegisterCourse: React.FC = () => {
   };
 
   return (
+
+   
     <div className="course-container">
-      <h2>Register for a Course</h2>
+      
       <table>
         <thead>
           <tr>

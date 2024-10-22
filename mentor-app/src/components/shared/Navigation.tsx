@@ -2,6 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import authService from '../../services/AuthService';
 import '../../styles/navigation.css';
+import SearchIcon from '@mui/icons-material/Search';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+
 const Navigation: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState('');
@@ -32,14 +36,14 @@ const Navigation: React.FC = () => {
         {dashboardTitle && <span className="dashboard-title">{dashboardTitle}</span>}
       </div>
       <div className="toolbar-right">
-        {isAuthenticated && userRole === 'Admin' && <Link to="/admin/dashboard">Admin</Link>}
-        {isAuthenticated && userRole === 'Faculty' && <Link to="/faculty/dashboard">Faculty</Link>}
-        {isAuthenticated && userRole === 'Student' && <Link to="/student/dashboard">Student</Link>}
-        <span className="icons">
-          <i className="material-icons">search</i>
-          <i className="material-icons">notifications</i>
-          <i className="material-icons">account_circle</i>
-        </span>
+      <div className="header">
+        <div> <SearchIcon /></div>
+        <div> <NotificationsIcon /></div>
+        <div> <AccountCircleIcon /></div>
+     
+     
+     
+    </div>
         {isAuthenticated ? (
           <button onClick={logout}>
             <i className="material-icons">logout</i>

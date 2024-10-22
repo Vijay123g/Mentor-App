@@ -1,11 +1,23 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import LoginComponent from './components/auth/Login';
 import SignupComponent from './components/auth/Signup';
 import AdminDashboard from './components/admin/AdminDashboard';
 import FacultyDashboard from './components/faculty/FacultyDashboard';
 import StudentDashboard from './components/student/StudentDashboard';
 import { AdminGuard, FacultyGuard, StudentGuard } from './guards/RoleGuard';
+import AddFaculty from './components/admin/AddFaculty';
+import AssignCourses from './components/admin/AssignCourses';
+import CourseDetails from './components/admin/ViewCourseDetails';
+import ViewFacultyDetails from './components/admin/ViewFacultyDetails';
+import FacultyCourses from './components/faculty/ViewAssignedCourses';
+import AddQuestions from './components/faculty/AddQuestions';
+import ValidateAnswers from './components/faculty/ValidateAnswers';
+import Navigation from './components/shared/Navigation';
+import ViewQuestions from './components/faculty/ViewQuestions';
+import RegisterCourse from './components/student/RegisterCourse';
+import AttemptExam from './components/student/AttemptExam';
+import ViewResults from './components/student/ViewResults';
 
 const App: React.FC = () => {
   return (
@@ -14,16 +26,34 @@ const App: React.FC = () => {
         <Route path="/login" element={<LoginComponent />} />
         <Route path="/signup" element={<SignupComponent />} />
 
-        <Route path="/admin/*" element={<AdminGuard requiredRole="admin" />}>
-          <Route path="dashboard" element={<AdminDashboard />} />
+        <Route path="/admin/*" element={<AdminGuard requiredRole="Admin" />}>
+          <Route element={<NavigationLayout />}>
+            <Route path="" element={<AdminDashboard />} />
+            <Route path="add-faculty" element={<AddFaculty />} />
+            <Route path="assign-courses" element={<AssignCourses />} />
+            <Route path="view-faculty" element={<ViewFacultyDetails />} />
+            <Route path="view-courses" element={<CourseDetails />} />
+          </Route>
         </Route>
 
-        <Route path="/faculty/*" element={<FacultyGuard requiredRole="faculty" />}>
-          <Route path="dashboard" element={<FacultyDashboard />} />
+
+        <Route path="/faculty/*" element={<FacultyGuard requiredRole="Faculty" />}>
+          <Route element={<NavigationLayout />}>
+            <Route path="" element={<FacultyDashboard />} />
+            <Route path="viewAssignedCourses" element={<FacultyCourses />} />
+            <Route path="addQuestions" element={<AddQuestions />} />
+            <Route path="validateAnswers" element={<ValidateAnswers />} />
+            <Route path="viewQuestions" element={<ViewQuestions />} />
+          </Route>
         </Route>
 
-        <Route path="/student/*" element={<StudentGuard requiredRole="student" />}>
-          <Route path="dashboard" element={<StudentDashboard />} />
+        <Route path="/student/*" element={<StudentGuard requiredRole="Student" />}>
+          <Route element={<NavigationLayout />}>
+            <Route path="" element={<StudentDashboard />} />
+            <Route path="register-course" element={<RegisterCourse />} />
+            <Route path="attempt-exam" element={<AttemptExam />} />
+            <Route path="view-results" element={<ViewResults />} />
+          </Route>
         </Route>
 
         <Route path="/" element={<Navigate to="/login" replace />} />
@@ -31,5 +61,14 @@ const App: React.FC = () => {
     </Router>
   );
 };
+
+const NavigationLayout: React.FC = () => (
+  <>
+    <Navigation />
+    <div className="dashboard-content">
+      <Outlet />
+    </div>
+  </>
+);
 
 export default App;

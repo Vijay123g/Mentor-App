@@ -14,21 +14,26 @@ const Login: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
 
-  const onSubmit: SubmitHandler<LoginFormInputs> = (data) => {
-    authService.login(data).then(response => {
-      console.log('data and response',data,response);
-      if (response.success) {
+  const onSubmit = (data: any) => {
+    authService.login(data).then((response) => {
+      if (response.token) {
         localStorage.setItem('token', response.token);
         localStorage.setItem('role', response.role);
-        navigate(`/${response.role}/dashboard`);
+
+        if (response.role === 'Admin') {
+          navigate('/admin');
+        } else if (response.role === 'Faculty') {
+          navigate('/faculty');
+        } else if (response.role === 'Student') {
+          navigate('/student');
+        }
       } else {
-        setErrorMessage('Invalid login credentials');
+        setErrorMessage('Invalid credentials, please try again.');
       }
-    }).catch(() => {
-      setErrorMessage('Login failed: Server error or invalid credentials');
+    }).catch((error) => {
+      setErrorMessage('Login failed: ' + error.message);
     });
   };
-
   return (
     <div className="login-container">
       <div className="login-center">

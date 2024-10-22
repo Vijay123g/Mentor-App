@@ -7,7 +7,9 @@ type User =  any;
 
 const authService = {
   signup: async (user: Omit<User, 'id'>) => {
+
     const response = await axios.post(`${url}/signup`, user);
+    console.log('response',response);
     return response.data;
   },
 

@@ -7,6 +7,7 @@ const FacultyCourses: React.FC = () => {
 
   useEffect(() => {
     const facultyId = localStorage.getItem('userId') || '';
+    console.log('facultyId',facultyId);
     if (facultyId) {
       courseService.getFacultyCourseList(facultyId)
         .then(response => {

@@ -1,24 +1,41 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-
+import React, { useState } from 'react';
 import '../../styles/adminDashboard.css';
+import DefaultAdminComponent from './DefaultAdminComponent';
+import AddFaculty from './AddFaculty';
+import AssignCourses from './AssignCourses';
+import CourseDetails from './ViewCourseDetails';
+import ViewFacultyDetails from './ViewFacultyDetails';
 
 const AdminDashboard: React.FC = () => {
-  
-const navigate = useNavigate();
+  const [selectedComponent, setSelectedComponent] = useState<string>('default');
 
-  const addFaculty = () => navigate('/admin/add-faculty');
-  const assignCourses = () => navigate('/admin/assign-courses');
-  const viewFacultyDetails = () => navigate('/admin/view-faculty');
-  const viewCourseDetails = () => navigate('/admin/view-courses');
+  const renderComponent = () => {
+    switch (selectedComponent) {
+      case 'addFaculty':
+        return <AddFaculty />;
+      case 'assignCourses':
+        return <AssignCourses />;
+      case 'viewFaculty':
+        return <ViewFacultyDetails />;
+      case 'viewCourses':
+          return <CourseDetails />;
+      
+      default:
+        return <DefaultAdminComponent />;
+    }
+  };
 
   return (
     <div className="admin-dashboard-container">
-      <h2>Admin Dashboard</h2>
-      <button onClick={addFaculty}>Add Faculty</button>
-      <button onClick={assignCourses}>Assign Courses</button>
-      <button onClick={viewFacultyDetails}>View Faculty Details</button>
-      <button onClick={viewCourseDetails}>View Course Details</button>
+      <div className="sidenav">
+        <button onClick={() => setSelectedComponent('addFaculty')}>Add Faculty</button>
+        <button onClick={() => setSelectedComponent('assignCourses')}>Assign Courses</button>
+        <button onClick={() => setSelectedComponent('viewFaculty')}>View Faculty Details</button>
+        <button onClick={() => setSelectedComponent('viewCourses')}>View Course Details</button>
+      </div>
+      <div className="main-content">
+        {renderComponent()}
+      </div>
     </div>
   );
 };

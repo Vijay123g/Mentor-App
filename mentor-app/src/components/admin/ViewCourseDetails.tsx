@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
+import '../../styles/viewCourseDetails.css';
 import  CourseService from '../../services/courseService';
 import  FacultyService  from '../../services/facultyService';
 import courseService from '../../services/courseService';

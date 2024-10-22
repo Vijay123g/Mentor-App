@@ -12,16 +12,20 @@ interface SignupFormInputs {
 }
 
 const Signup: React.FC = () => {
-  const { register, handleSubmit, formState: { errors } } = useForm<SignupFormInputs>();
+  const { register, handleSubmit, formState: { errors } } = useForm<SignupFormInputs>({
+    defaultValues: { role: 'Student' }
+  });
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const navigate = useNavigate();
 
   const onSubmit: SubmitHandler<SignupFormInputs> = (data) => {
+    data.role = 'Student';
+    console.log('signup Data',data);
     authService.signup(data).then(response => {
-      if (response.success) {
+      if (response) {
         setSuccessMessage('You have successfully signed up!');
-        setTimeout(() => navigate('/login'), 2000); // Redirect to login after success
+        setTimeout(() => navigate('/login'), 2000);
       } else {
         setErrorMessage('Signup failed. Please try again.');
       }
@@ -57,15 +61,7 @@ const Signup: React.FC = () => {
             placeholder="Password"
           />
           {errors.password && <p className="error-message">{errors.password.message}</p>}
-
-          <label>Role</label>
-          <select {...register('role', { required: 'Role is required' })}>
-            <option value="Student">Student</option>
-            <option value="Faculty">Faculty</option>
-            <option value="Admin">Admin</option>
-          </select>
-          {errors.role && <p className="error-message">{errors.role.message}</p>}
-
+          
           <button type="submit" className="btn btn-signup">Sign Up</button>
         </form>
 

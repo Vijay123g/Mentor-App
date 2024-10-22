@@ -14,16 +14,16 @@ const AppRouter: React.FC = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
 
-        <Route path="/admin" element={<AdminGuard requiredRole="admin" />}>
-          <Route path="dashboard" element={<AdminDashboard />} />
+        <Route path="/admin-dashboard" element={<AdminGuard requiredRole="Admin" />}>
+          <Route path="" element={<AdminDashboard />} />
         </Route>
 
-        <Route path="/faculty" element={<FacultyGuard requiredRole="faculty" />}>
-          <Route path="dashboard" element={<FacultyDashboard />} />
+        <Route path="/faculty-dashboard" element={<FacultyGuard requiredRole="Faculty" />}>
+          <Route path="" element={<FacultyDashboard />} />
         </Route>
 
-        <Route path="/student" element={<StudentGuard requiredRole="student" />}>
-          <Route path="dashboard" element={<StudentDashboard />} />
+        <Route path="/student-dashboard" element={<StudentGuard requiredRole="Student" />}>
+          <Route path="" element={<StudentDashboard />} />
         </Route>
 
         <Route path="/" element={<Navigate to="/login" replace />} />

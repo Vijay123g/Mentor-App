@@ -1,54 +1,82 @@
+
 .toolbar {
-    background-color: #3f51b5;
-    color: white;
-    display: flex;
-    justify-content: space-between;
-    padding: 0 20px;
-    align-items: center;
-  }
-  
-  .toolbar-left {
-    display: flex;
-    align-items: center;
-  }
-  
-  .app-name {
-    font-size: 24px;
-    font-weight: bold;
-    color: white;
-    text-decoration: none;
-  }
-  
-  .dashboard-title {
-    font-size: 20px;
-    margin-left: 20px;
-    font-weight: 500;
-  }
-  
-  .toolbar-right {
-    display: flex;
-    align-items: center;
-  }
-  
-  .icons {
-    display: flex;
-    margin-right: 20px;
-  }
-  
-  .material-icons {
-    margin: 0 10px;
-    cursor: pointer;
-    color: white;
-  }
-  
-  button {
-    background: none;
-    border: none;
-    color: white;
-    cursor: pointer;
-  }
-  
-  button:hover {
-    text-decoration: underline;
-  }
-  
+  background-color: #3f51b5;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 20px;
+  align-items: center;
+}
+
+.toolbar-left {
+  display: flex;
+  align-items: center;
+}
+
+.app-name {
+  font-size: 24px;
+  font-weight: bold;
+  color: white;
+  text-decoration: none;
+}
+
+.dashboard-title {
+  font-size: 20px;
+  margin-left: 20px;
+  font-weight: 500;
+}
+
+.toolbar-right {
+  display: flex;
+  align-items: center;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 15px; 
+}
+
+.header div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header svg {
+  font-size: 24px; 
+  color: white;
+  cursor: pointer;
+}
+
+
+.logout-button {
+  background-color: blue;
+  border: none;
+  color: black;
+  cursor: pointer;
+  padding: 10px 15px;
+  margin-left: 20px;
+}
+
+.logout-button:hover {
+  text-decoration: underline;
+  background-color: darkblue;
+}
+
+
+/* button {
+  background-color: blue;
+  color: black;
+  padding: 10px 20px; 
+  border: none;
+  border-radius: 5px; 
+  cursor: pointer;
+  display: inline-block; 
+  text-align: center;
+}
+
+button:hover {
+  background-color: darkblue;
+} */
+
