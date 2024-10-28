@@ -5,6 +5,7 @@ import '../../styles/navigation.css';
 import SearchIcon from '@mui/icons-material/Search';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import { AppBar, Toolbar, IconButton, Typography, Box, Button } from '@mui/material';
 
 const Navigation: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -30,32 +31,45 @@ const Navigation: React.FC = () => {
   };
 
   return (
-    <div className="toolbar">
-      <div className="toolbar-left">
-        <Link to="/" className="app-name">MentorApp</Link>
-        {dashboardTitle && <span className="dashboard-title">{dashboardTitle}</span>}
-      </div>
-      <div className="toolbar-right">
-      <div className="header">
-        <div> <SearchIcon /></div>
-        <div> <NotificationsIcon /></div>
-        <div> <AccountCircleIcon /></div>
-     
-     
-     
-    </div>
-        {isAuthenticated ? (
-          <button onClick={logout}>
-            <i className="material-icons">logout</i>
-          </button>
-        ) : (
-          <>
-            <Link to="/login">Login</Link>
-            <Link to="/signup">Signup</Link>
-          </>
-        )}
-      </div>
-    </div>
+    <AppBar position="fixed" color="primary">
+      <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Typography variant="h6" component={Link} to="/" sx={{ color: 'inherit', textDecoration: 'none' }}>
+            MentorApp
+          </Typography>
+          {dashboardTitle && (
+            <Typography variant="subtitle1" sx={{ marginLeft: 2 }}>
+              {dashboardTitle}
+            </Typography>
+          )}
+        </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          {/* <IconButton color="inherit">
+            <SearchIcon />
+          </IconButton> */}
+          {/* <IconButton color="inherit">
+            <NotificationsIcon />
+          </IconButton>
+          <IconButton color="inherit">
+            <AccountCircleIcon />
+          </IconButton> */}
+          {isAuthenticated ? (
+            <Button onClick={logout} variant="contained" color="secondary" sx={{ color: 'black' }}>
+              Logout
+            </Button>
+          ) : (
+            <>
+              <Button component={Link} to="/login" variant="text" color="inherit">
+                Login
+              </Button>
+              <Button component={Link} to="/signup" variant="text" color="inherit">
+                Signup
+              </Button>
+            </>
+          )}
+        </Box>
+      </Toolbar>
+    </AppBar>
   );
 };
 

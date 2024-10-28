@@ -2,7 +2,14 @@ import React, { useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import authService from '../../services/AuthService';
-import '../../styles/login.css';
+import {
+  Box,
+  Typography,
+  TextField,
+  Button,
+  Link,
+  Alert
+} from '@mui/material';
 
 interface LoginFormInputs {
   email: string;
@@ -14,19 +21,13 @@ const Login: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
 
-  const onSubmit = (data: any) => {
+  const onSubmit: SubmitHandler<LoginFormInputs> = (data) => {
     authService.login(data).then((response) => {
       if (response.token) {
         localStorage.setItem('token', response.token);
         localStorage.setItem('role', response.role);
 
-        if (response.role === 'Admin') {
-          navigate('/admin');
-        } else if (response.role === 'Faculty') {
-          navigate('/faculty');
-        } else if (response.role === 'Student') {
-          navigate('/student');
-        }
+        navigate(response.role === 'Admin' ? '/admin' : response.role === 'Faculty' ? '/faculty' : '/student');
       } else {
         setErrorMessage('Invalid credentials, please try again.');
       }
@@ -34,27 +35,74 @@ const Login: React.FC = () => {
       setErrorMessage('Login failed: ' + error.message);
     });
   };
+
   return (
-    <div className="login-container">
-      <div className="login-center">
-        <h2>Login! 👋</h2>
-        <p>Enter your details to access your account.</p>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <label>Email</label>
-          <input {...register('email', { required: 'Email is required' })} placeholder="abc@gmail.com" />
-          {errors.email && <p className="error-message">{errors.email.message}</p>}
+    <Box 
+      display="flex" 
+      height="100vh" 
+      alignItems="center" 
+      justifyContent="center" 
+      bgcolor="#f5f5f5" 
+      padding={2}
+    >
+      <Box 
+        display="flex" 
+        flexDirection="column" 
+        alignItems="center" 
+        width="100%" 
+        maxWidth="300px"
+        bgcolor="white" 
+        borderRadius={2} 
+        boxShadow={2} 
+        padding={3}
+      >
+        <Typography variant="h4" gutterBottom>
+          Login! 👋
+        </Typography>
+        <Typography variant="body1" gutterBottom>
+          Please Enter your Credentials.
+        </Typography>
 
-          <label>Password</label>
-          <input type="password" {...register('password', { required: 'Password is required' })} placeholder="password" />
-          {errors.password && <p className="error-message">{errors.password.message}</p>}
+        <form onSubmit={handleSubmit(onSubmit)} style={{ width: '100%' }}>
+          <TextField
+            label="Email"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            {...register('email', { required: 'Email is required' })}
+            error={!!errors.email}
+            helperText={errors.email ? errors.email.message : ''}
+          />
 
-          <button type="submit" className="btn btn-signin">Log In</button>
+          <TextField
+            label="Password"
+            type="password"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            {...register('password', { required: 'Password is required' })}
+            error={!!errors.password}
+            helperText={errors.password ? errors.password.message : ''}
+          />
+
+          <Button 
+            type="submit" 
+            variant="contained" 
+            color="primary" 
+            fullWidth 
+            sx={{ marginTop: 2 }}
+          >
+            Log In
+          </Button>
         </form>
 
-        {errorMessage && <p className="error-message">{errorMessage}</p>}
-        <p>If you are a student, <a href="/signup">Sign Up Now</a></p>
-      </div>
-    </div>
+        {errorMessage && <Alert severity="error" sx={{ marginTop: 2 }}>{errorMessage}</Alert>}
+
+        <Typography variant="body2" sx={{ marginTop: 2 }}>
+          If you are a student, <Link href="/signup">Sign Up Now</Link>
+        </Typography>
+      </Box>
+    </Box>
   );
 };
 

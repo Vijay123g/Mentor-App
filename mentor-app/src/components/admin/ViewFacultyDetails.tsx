@@ -1,16 +1,42 @@
 import React, { useEffect, useState } from 'react';
 import courseService from '../../services/courseService';
 import '../../styles/viewFaculty.css';
+import defaultPhoto from '../../assets/images/back1.jpg';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
+
+interface Faculty {
+  id: string;
+  name: string;
+  email: string;
+  user_id?: string;
+  photo?: string;
+  mobile?: string;
+  linkedin?: string;
+}
 
 const ViewFacultyDetails: React.FC = () => {
-  const [facultyList, setFacultyList] = useState<any[]>([]);
+  const [facultyList, setFacultyList] = useState<Faculty[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 6;
+  const [showCourses, setShowCourses] = useState(false);
+  const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
+  const [selectedFacultyName, setSelectedFacultyName] = useState<string>('');
+
+  const pageSize = 5;
   const totalPages = Math.ceil(facultyList.length / pageSize);
 
   useEffect(() => {
     courseService.getFacultyDetails().then(response => setFacultyList(response));
   }, []);
+
+  const handleFacultyClick = (employeeId: string, facultyName: string) => {
+    courseService.getFacultyCourseList(employeeId)
+      .then(response => {
+        setSelectedCourses(response.map((course: { title: string }) => course.title));
+        setSelectedFacultyName(facultyName);
+        setShowCourses(true);
+      })
+      .catch(error => console.error('Error fetching assigned courses:', error));
+  };
 
   const paginatedList = facultyList.slice(
     (currentPage - 1) * pageSize,
@@ -29,10 +55,14 @@ const ViewFacultyDetails: React.FC = () => {
     <div className="admin-view-faculty-container">
       <h2>Faculty Details</h2>
       <div className="faculty-grid">
-        {paginatedList?.map(faculty => (
-          <div className="faculty-card" key={faculty.id}>
+        {paginatedList.map(faculty => (
+          <div
+            className="faculty-card"
+            key={faculty.id}
+            onClick={() => handleFacultyClick(faculty.user_id || '', faculty.name)}
+          >
             <img
-              src={faculty.photo || '/assets/images/back1.jpg'}
+              src={faculty.photo || defaultPhoto}
               alt={faculty.name}
               className="faculty-photo"
             />
@@ -40,21 +70,6 @@ const ViewFacultyDetails: React.FC = () => {
               <h3>{faculty.name}</h3>
               <p>Email: {faculty.email}</p>
               <p>Employee ID: {faculty.user_id || 'Not Available'}</p>
-              <div className="faculty-icons">
-                <a href={`mailto:${faculty.email}`} className="icon">
-                  <i className="fas fa-envelope"></i>
-                </a>
-                {faculty.mobile && (
-                  <a href={`tel:${faculty.mobile}`} className="icon">
-                    <i className="fas fa-phone"></i>
-                  </a>
-                )}
-                {faculty.linkedin && (
-                  <a href={faculty.linkedin} target="_blank" rel="noopener noreferrer" className="icon">
-                    <i className="fab fa-linkedin"></i>
-                  </a>
-                )}
-              </div>
             </div>
           </div>
         ))}
@@ -71,6 +86,24 @@ const ViewFacultyDetails: React.FC = () => {
           Next
         </button>
       </div>
+
+      <Dialog open={showCourses} onClose={() => setShowCourses(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Assigned Courses for {selectedFacultyName}</DialogTitle>
+        <DialogContent>
+          <ul>
+            {selectedCourses.length > 0 ? (
+              selectedCourses.map((course, index) => (
+                <li key={index}>{course}</li>
+              ))
+            ) : (
+              <p>No courses assigned.</p>
+            )}
+          </ul>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowCourses(false)} color="primary">Close</Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };

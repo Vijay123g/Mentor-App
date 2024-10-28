@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import authService from '../../services/AuthService';
+import { Card, CardContent, Typography, Grid } from '@mui/material';
 
 const DefaultAdminComponent: React.FC = () => {
   const [facultyCount, setFacultyCount] = useState(0);
@@ -7,33 +8,59 @@ const DefaultAdminComponent: React.FC = () => {
   const [courseCount, setCourseCount] = useState(20);
 
   useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        const counts = await authService.getCounts();
+        setFacultyCount(counts.facultyCount);
+        setStudentCount(counts.studentCount);
+        setCourseCount(counts.coursesCount);
+      } catch (error) {
+        console.error('Error fetching counts', error);
+      }
+    };
+
     fetchCounts();
   }, []);
 
-  const fetchCounts = async () => {
-    const counts = await authService.getCounts();
-    setFacultyCount(counts.facultyCount);
-    setStudentCount(counts.studentCount);
-    setCourseCount(counts.coursesCount);
-  };
-
   return (
-    <div className="dashboard-summary">
-      <div className="stats">
-        <div className="stat-card">
-          <h3>Total Faculty</h3>
-          <p>{facultyCount}</p>
-        </div>
-        <div className="stat-card">
-          <h3>Total Students</h3>
-          <p>{studentCount}</p>
-        </div>
-        <div className="stat-card">
-          <h3>Total Courses</h3>
-          <p>{courseCount}</p>
-        </div>
-      </div>
-    </div>
+    <Grid container spacing={3} sx={{ marginTop: '20px' }}>
+      <Grid item xs={12} sm={4}>
+        <Card>
+          <CardContent>
+            <Typography variant="h6" color="textSecondary">
+              Total Faculty
+            </Typography>
+            <Typography variant="h4" color="primary">
+              {facultyCount}
+            </Typography>
+          </CardContent>
+        </Card>
+      </Grid>
+      <Grid item xs={12} sm={4}>
+        <Card>
+          <CardContent>
+            <Typography variant="h6" color="textSecondary">
+              Total Students
+            </Typography>
+            <Typography variant="h4" color="primary">
+              {studentCount}
+            </Typography>
+          </CardContent>
+        </Card>
+      </Grid>
+      <Grid item xs={12} sm={4}>
+        <Card>
+          <CardContent>
+            <Typography variant="h6" color="textSecondary">
+              Total Courses
+            </Typography>
+            <Typography variant="h4" color="primary">
+              {courseCount}
+            </Typography>
+          </CardContent>
+        </Card>
+      </Grid>
+    </Grid>
   );
 };
 

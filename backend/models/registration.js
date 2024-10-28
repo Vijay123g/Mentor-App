@@ -60,4 +60,23 @@ module.exports = class Registration {
       throw error;
     }
   }
+
+  static async findRegistrationsWithDetailsByStudentId(studentId) {
+    try {
+      const [results] = await db.execute(
+        `SELECT *
+         FROM student_course_registration AS r
+         JOIN users u ON r.student_id = u.user_id
+         JOIN courses c ON c.id = r.course_id
+         LEFT JOIN exam_answers ea ON ea.registration_id = r.registration_id
+          LEFT JOIN questions q ON q.question_id = ea.question_id
+         WHERE r.student_id = ?`,
+        [studentId]
+      );
+      return results;
+    } catch (error) {
+      console.error('Error fetching detailed registrations:', error);
+      throw error;
+    }
+  }
 };

@@ -13,7 +13,7 @@ const answerService = {
     return response.data;
   },
 
-  validateAnswer: async (answerId: number, validatedBY: string, validationStatus: boolean) => {
+  validateAnswer: async (answerId: number, validatedBY: string, validationStatus: number) => {
     const response = await axios.put(`${baseUrl}/answer/answer/validate`, { answerId, validatedBY, validationStatus });
     return response.data;
   },

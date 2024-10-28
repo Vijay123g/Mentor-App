@@ -144,3 +144,22 @@ exports.getAllAssignedCourses = async (req, res, next) => {
     }
 };
 
+
+exports.getCoursesByFaculty = async (req, res, next) => {
+  const facultyId = req.params.facultyId;
+
+  try {
+    const courses = await Course.getCoursesByFacultyId(facultyId);
+
+    if (!courses.length) {
+      return res.status(404).json({ message: 'No courses found for this faculty.' });
+    }
+
+    res.status(200).json(courses);
+  } catch (err) {
+    console.error('Error fetching courses by faculty:', err);
+    next(err);
+  }
+};
+
+

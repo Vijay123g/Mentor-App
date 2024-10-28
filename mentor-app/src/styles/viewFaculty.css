@@ -1,84 +1,120 @@
 .faculty-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 20px;
-  padding: 20px;
-}
-
-.faculty-card {
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  padding: 15px;
-  text-align: center;
-  background-color: #fff;
-  transition: transform 0.2s;
-}
-
-.faculty-card:hover {
-  transform: scale(1.05);
-}
-
-.faculty-photo {
-  width: 100%;
-  height: 150px;
-  object-fit: cover;
-  border-radius: 4px;
-}
-
-.faculty-details {
-  margin-top: 10px;
-}
-
-.faculty-details h3 {
-  font-size: 18px;
-  margin: 10px 0 5px;
-}
-
-.faculty-details p {
-  font-size: 14px;
-  margin: 5px 0;
-}
-
-.faculty-icons {
-  display: flex;
-  justify-content: center;
-  margin-top: 10px;
-}
-
-.icon {
-  margin: 0 10px;
-  font-size: 20px;
-  color: #007bff;
-  transition: color 0.3s;
-}
-
-.icon:hover {
-  color: #0056b3;
-}
-
-.pagination {
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
-}
-
-.pagination button {
-  padding: 10px 20px;
-  margin: 0 5px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.pagination button:disabled {
-  background-color: #ddd;
-}
-
-.pagination span {
-  line-height: 40px;
-  margin: 0 10px;
-}
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    padding: 20px;
+  }
+  
+  .faculty-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    text-align: center;
+    background-color: #fff;
+    transition: transform 0.2s;
+  }
+  
+  .faculty-card:hover {
+    transform: scale(1.05);
+  }
+  
+  .faculty-photo {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+  
+  .faculty-details {
+    margin-top: 10px;
+  }
+  
+  .faculty-details h3 {
+    font-size: 18px;
+    margin: 10px 0 5px;
+  }
+  
+  .faculty-details p {
+    font-size: 14px;
+    margin: 5px 0;
+  }
+  
+  .faculty-icons {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+  }
+  
+  .icon {
+    margin: 0 10px;
+    font-size: 20px;
+    color: #007bff;
+    transition: color 0.3s;
+  }
+  
+  .icon:hover {
+    color: #0056b3;
+  }
+  
+  .pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+  }
+  
+  .pagination button {
+    padding: 5px 10px;
+    margin: 0 5px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .pagination button:disabled {
+    background-color: #ddd;
+  }
+  
+  .pagination span {
+    line-height: 20px;
+    margin: 0 5px;
+  }
+  
+  .popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  
+  .popup-content {
+    background-color: white;
+    padding: 20px;
+    width: 500px;
+    border-radius: 8px;
+    position: relative;
+  }
+  
+  .close-popup-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .faculty-courses-container {
+    padding: 10px;
+  }
+  

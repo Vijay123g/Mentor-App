@@ -1,7 +1,7 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
+import { Container, Paper, Typography, TextField, Button } from '@mui/material';
 import authService from "../../services/AuthService";
-import '../../styles/addFaculty.css';
 import { AxiosError } from 'axios';
 
 const AddFaculty: React.FC = () => {
@@ -17,49 +17,59 @@ const AddFaculty: React.FC = () => {
         alert('Faculty added successfully!');
     } catch (error: unknown) {
         if (isAxiosError(error) && error.response) {
-            if (error.response.status === 422) {
-                setErrorMessage('Failed to add faculty. Please check the input.');
-            } else {
-                setErrorMessage('Something went wrong. Please try again later.');
-            }
+            setErrorMessage(error.response.status === 422 
+                ? 'Failed to add faculty. Please check the input.'
+                : 'Something went wrong. Please try again later.');
         } else {
             setErrorMessage('Something went wrong. Please try again later.');
         }
     }
-};
+  };
 
-
-const isAxiosError = (error: unknown): error is AxiosError => {
+  const isAxiosError = (error: unknown): error is AxiosError => {
     return (error as AxiosError).isAxiosError !== undefined;
-};
-
+  };
 
   return (
-    <div className="admin-add-faculty-container">
-      <h2>Add Faculty</h2>
-      {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
-      <form onSubmit={handleSubmit(onSubmit)}>
-      <div className="form-field">
-    <label>Name</label>
-    <input {...register('name', { required: 'Name is required' })} />
-    {errors.name && <p style={{ color: 'red' }}>{(errors.name as any).message}</p>}
-</div>
-<div className="form-field">
-    <label>Email</label>
-    <input {...register('email', { 
-        required: 'Email is required', 
-        pattern: { value: /^\S+@\S+$/, message: 'Invalid email format' } 
-    })} />
-    {errors.email && <p style={{ color: 'red' }}>{(errors.email as any).message}</p>}
-</div>
-<div className="form-field">
-    <label>Password</label>
-    <input type="password" {...register('password', { required: 'Password is required', minLength: { value: 8, message: 'Password must be at least 8 characters long' } })} />
-    {errors.password && <p style={{ color: 'red' }}>{(errors.password as any).message}</p>}
-</div>
-        <button type="submit">Add Faculty</button>
-      </form>
-    </div>
+    <Container maxWidth="sm">
+      <Paper elevation={3} sx={{ p: 4, mt: 5, backgroundColor: 'background.paper' }}>
+        <Typography variant="h5" gutterBottom>Add Faculty</Typography>
+        {errorMessage && <Typography color="error">{errorMessage}</Typography>}
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <TextField 
+            fullWidth 
+            label="Name" 
+            {...register('name', { required: 'Name is required' })} 
+            error={!!errors.name} 
+            helperText={(errors.name as any)?.message}
+            sx={{ mb: 2 }} 
+          />
+          <TextField 
+            fullWidth 
+            label="Email" 
+            {...register('email', { 
+              required: 'Email is required', 
+              pattern: { value: /^\S+@\S+$/, message: 'Invalid email format' }
+            })} 
+            error={!!errors.email} 
+            helperText={(errors.email as any)?.message} 
+            sx={{ mb: 2 }}
+          />
+          <TextField 
+            fullWidth 
+            label="Password" 
+            type="password" 
+            {...register('password', { required: 'Password is required', minLength: { value: 8, message: 'Password must be at least 8 characters' } })} 
+            error={!!errors.password} 
+            helperText={(errors.password as any)?.message} 
+            sx={{ mb: 2 }}
+          />
+          <Button type="submit" variant="contained" color="primary" fullWidth>
+            Add Faculty
+          </Button>
+        </form>
+      </Paper>
+    </Container>
   );
 };
 

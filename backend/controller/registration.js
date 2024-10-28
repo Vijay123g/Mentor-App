@@ -74,3 +74,20 @@ exports.unregisterStudent = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.getDetailedRegistrationsByStudent = async (req, res, next) => {
+  const studentId = req.params.studentId;
+
+  try {
+    const registrations = await Registration.findRegistrationsWithDetailsByStudentId(studentId);
+
+    if (registrations.length > 0) {
+      res.status(200).json({ registrations });
+    } else {
+      res.status(404).json({ message: 'No detailed registrations found for this student.' });
+    }
+  } catch (err) {
+    if (!err.statusCode) err.statusCode = 500;
+    next(err);
+  }
+};

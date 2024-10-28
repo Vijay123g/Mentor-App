@@ -19,4 +19,7 @@ router.get('/registrations/course/:courseId', registrationController.getRegistra
 
 router.delete('/unregister/:registrationId', registrationController.unregisterStudent);
 
+router.get(
+  '/detailed-registrations/student/:studentId',registrationController.getDetailedRegistrationsByStudent)
+
 module.exports = router;

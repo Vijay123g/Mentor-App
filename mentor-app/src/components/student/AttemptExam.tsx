@@ -1,10 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import courseService from '../../services/courseService';
 import questionService from '../../services/questionService';
 import answerService from '../../services/answerService';
 import registrationService from '../../services/registrationService';
-import '../../styles/attemptExam.css';
+import { Box, Button, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material';
+
+interface Course {
+  id: number;
+  title: string;
+}
+
+interface Registration {
+  course_id: number;
+  title: string;
+}
 
 const AttemptExam: React.FC = () => {
   const [coursesList, setCoursesList] = useState<any[]>([]);
@@ -16,51 +25,53 @@ const AttemptExam: React.FC = () => {
 
   useEffect(() => {
     const studentId = localStorage.getItem('userId') || '';
-    courseService.getRegisteredCourses(studentId).then(response => {
-      setCoursesList(response);
-    }).catch(error => {
-      console.error('Error fetching registered courses', error);
+    registrationService.getDetailedRegistrationsByStudent(studentId).then((response) => {
+      const uniqueCourses = response.registrations.reduce((acc: Course[], registration: Registration) => {
+        if (!acc.some((course: Course) => course.id === registration.course_id)) {
+          acc.push({
+            id: registration.course_id,
+            title: registration.title,
+          });
+        }
+        return acc;
+      }, [] as Course[]);
+      setCoursesList(uniqueCourses);
     });
-  }, []);
+  },[]);
+  
 
   useEffect(() => {
     if (selectedCourseId) {
-
-      questionService.getQuestionsByCourse(selectedCourseId).then(response => {
-        setQuestions(response.questions);
-      }).catch(error => {
-        console.error('Error fetching questions', error);
-      });
-
-      registrationService.getRegistrationsByCourse(selectedCourseId).then(response => {
-        const registration = response.registrations.find((reg: { student_id: number }) => reg.student_id === parseInt(localStorage.getItem('userId') || '', 10));
-        if (registration) {
-          setRegistrationId(registration.registration_id);
-        } else {
-          console.error('No registration found for this course.');
-        }
-      }).catch(error => {
-        console.error('Error fetching registrations for course', error);
-      });
+      questionService.getQuestionsByCourse(selectedCourseId)
+        .then(response => setQuestions(response?.questions || []))  // Safeguard for undefined response
+        .catch(error => console.error('Error fetching questions:', error));
+      registrationService.getRegistrationsByCourse(selectedCourseId)
+        .then(response => {
+          const registration = response?.registrations?.find(
+            (reg: { student_id: number }) => reg.student_id === parseInt(localStorage.getItem('userId') || '', 10)
+          );
+          if (registration) setRegistrationId(registration.registration_id);
+        })
+        .catch(error => console.error('Error fetching registrations by course:', error));
     }
   }, [selectedCourseId]);
+  
 
   const onSubmit = async (data: any) => {
-    const studentId = localStorage.getItem('userId') || '';
-    
+    if (!registrationId) {
+      alert('Registration not found for this course.');
+      return;
+    }
     try {
       const facultyData = await answerService.getFacultyByCourse(data.courseId);
-      const facultyId = facultyData.facultyId;
-      
       await answerService.submitAnswer({
         registrationId,
-        studentId,
+        studentId: localStorage.getItem('userId') || '',
         questionId: data.questionId,
         answerText: data.answer,
-        validatedBy: facultyId,
+        validatedBy: facultyData.facultyId,
         validationStatus: false,
       });
-
       alert('Answer submitted successfully!');
     } catch (error) {
       console.error('Error submitting answer', error);
@@ -69,44 +80,45 @@ const AttemptExam: React.FC = () => {
   };
 
   return (
-    <div className="attempt-exam-container">
-      <h2>Attempt Exam</h2>
+    <Box sx={{ padding: 3 }}>
+      <Typography variant="h4">Attempt Exam</Typography>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="form-field">
-          <label>Select Course</label>
-          <select {...register('courseId', { required: true })}>
-            <option value="">Select a course</option>
+        <FormControl fullWidth margin="normal">
+          <InputLabel>Select Course</InputLabel>
+          <Select {...register('courseId', { required: true })} defaultValue="">
             {coursesList.map(course => (
-              <option key={course.id} value={course.id}>
-                {course.title}
-              </option>
+              <MenuItem key={course.id} value={course.id}>{course.title}</MenuItem>
             ))}
-          </select>
-          {errors.courseId && <span className="error">Course is required</span>}
-        </div>
+          </Select>
+        </FormControl>
+        {errors.courseId && <Typography color="error">Course is required</Typography>}
 
-        <div className="form-field">
-          <label>Select Question</label>
-          <select {...register('questionId', { required: true })}>
-            <option value="">Select a question</option>
+        <FormControl fullWidth margin="normal">
+          <InputLabel>Select Question</InputLabel>
+          <Select {...register('questionId', { required: true })} defaultValue="">
             {questions.map(question => (
-              <option key={question.question_id} value={question.question_id}>
-                {question.question_text}
-              </option>
+              <MenuItem key={question.question_id} value={question.question_id}>{question.question_text}</MenuItem>
             ))}
-          </select>
-          {errors.questionId && <span className="error">Question is required</span>}
-        </div>
+          </Select>
+        </FormControl>
+        {errors.questionId && <Typography color="error">Question is required</Typography>}
 
-        <div className="form-field">
-          <label>Your Answer</label>
-          <textarea {...register('answer', { required: true })}></textarea>
-          {errors.answer && <span className="error">Answer is required</span>}
-        </div>
+        <TextField
+          label="Your Answer"
+          multiline
+          rows={4}
+          fullWidth
+          margin="normal"
+          {...register('answer', { required: true })}
+          error={!!errors.answer}
+          helperText={errors.answer && 'Answer is required'}
+        />
 
-        <button type="submit">Submit Answer</button>
+        <Button variant="contained" color="primary" type="submit">
+          Submit Answer
+        </Button>
       </form>
-    </div>
+    </Box>
   );
 };
 

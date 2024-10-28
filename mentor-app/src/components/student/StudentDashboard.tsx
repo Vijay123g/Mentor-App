@@ -1,40 +1,37 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import '../../styles/studentDashboard.css';
 import RegisterCourse from './RegisterCourse';
 import AttemptExam from './AttemptExam';
 import ViewResults from './ViewResults';
+import AppSidebar from '../shared/AppSidebar';
+import HomeDashboard from './HomeDashboard';
+import { Box, Container, Typography } from '@mui/material';
 
 const StudentDashboard: React.FC = () => {
-
   const [selectedComponent, setSelectedComponent] = useState<string>('default');
 
   const renderComponent = () => {
     switch (selectedComponent) {
-      case 'register-course':
-        return < RegisterCourse/>;
-      case 'attempt-exam':
-        return <AttemptExam />;
-      case 'view-results':
-        return <ViewResults />;
-      
-      default:
+      case 'home':
+        return <HomeDashboard/>;
+      case 'registerCourse':
         return <RegisterCourse />;
+      case 'attemptExam':
+        return <AttemptExam />;
+      case 'viewResults':
+        return <ViewResults />;
+      default:
+        return <HomeDashboard/>
     }
   };
 
   return (
-    <div className="admin-dashboard-container">
-      <div className="sidenav">
-        <button onClick={() => setSelectedComponent('register-course')}>Register</button>
-        <button onClick={() => setSelectedComponent('attempt-exam')}>Exam</button>
-        <button onClick={() => setSelectedComponent('view-results')}> Results</button>
-
-      </div>
-      <div className="main-content">
+    <Box sx={{ display: 'flex' }}>
+      <AppSidebar onSelectComponent={setSelectedComponent} role="student" />
+      <Container sx={{ flexGrow: 1, paddingTop: '50px' }}>
         {renderComponent()}
-      </div>
-    </div>
+      </Container>
+    </Box>
   );
 };
+
 export default StudentDashboard;

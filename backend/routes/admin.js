@@ -119,6 +119,8 @@ router.get('/assigned-courses', adminController.getAllAssignedCourses);
 
 router.get('/counts', adminController.getCounts);
 
+router.get('/courses/faculty/:facultyId', adminController.getCoursesByFaculty);
+
 
 
 module.exports = router;

@@ -18,6 +18,7 @@ import ViewQuestions from './components/faculty/ViewQuestions';
 import RegisterCourse from './components/student/RegisterCourse';
 import AttemptExam from './components/student/AttemptExam';
 import ViewResults from './components/student/ViewResults';
+import HomeDashboard from './components/student/HomeDashboard';
 
 const App: React.FC = () => {
   return (
@@ -44,12 +45,14 @@ const App: React.FC = () => {
             <Route path="addQuestions" element={<AddQuestions />} />
             <Route path="validateAnswers" element={<ValidateAnswers />} />
             <Route path="viewQuestions" element={<ViewQuestions />} />
+            
           </Route>
         </Route>
 
         <Route path="/student/*" element={<StudentGuard requiredRole="Student" />}>
           <Route element={<NavigationLayout />}>
             <Route path="" element={<StudentDashboard />} />
+            <Route path="home" element={<HomeDashboard/>} />
             <Route path="register-course" element={<RegisterCourse />} />
             <Route path="attempt-exam" element={<AttemptExam />} />
             <Route path="view-results" element={<ViewResults />} />

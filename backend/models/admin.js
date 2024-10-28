@@ -152,5 +152,23 @@ static async countFaculty() {
   }
 }
 
+static async getCoursesByFacultyId(facultyId) {
+  try {
+    const [coursesList] = await db.execute(
+      `SELECT *
+       FROM courses AS c
+       LEFT JOIN student_course_registration AS r ON r.course_id = c.id
+       LEFT JOIN questions AS q ON q.faculty_id = c.facultyId
+       LEFT JOIN users u ON u.user_id = r.student_id
+       WHERE c.facultyId = ?`,
+      [facultyId]
+    );
+    return coursesList;
+  } catch (error) {
+    console.error('Error fetching courses by faculty ID:', error);
+    throw error;
+  }
+}
+
 };
 

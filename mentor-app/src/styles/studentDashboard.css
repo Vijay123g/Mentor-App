@@ -4,13 +4,13 @@
   }
   
   .sidenav {
-    width: 250px;
+    width: 200px;
     height: 100vh;
-    background-color: #3f51b5;
+    background-color: #656ea0;
     padding: 20px;
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 1;
   }
   
   .sidenav button {

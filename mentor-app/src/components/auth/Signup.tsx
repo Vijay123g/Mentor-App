@@ -2,7 +2,14 @@ import React, { useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import authService from '../../services/AuthService';
-import '../../styles/signup.css';
+import {
+  Box,
+  Typography,
+  TextField,
+  Button,
+  Link,
+  Alert
+} from '@mui/material';
 
 interface SignupFormInputs {
   name: string;
@@ -21,7 +28,6 @@ const Signup: React.FC = () => {
 
   const onSubmit: SubmitHandler<SignupFormInputs> = (data) => {
     data.role = 'Student';
-    console.log('signup Data',data);
     authService.signup(data).then(response => {
       if (response) {
         setSuccessMessage('You have successfully signed up!');
@@ -35,42 +41,85 @@ const Signup: React.FC = () => {
   };
 
   return (
-    <div className="auth-signup-container">
-      <div className="auth-center">
-        <h2>Sign Up! 👋</h2>
-        <p>Create your account by filling in the details below.</p>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <label>Name</label>
-          <input
-            {...register('name', { required: 'Name is required', minLength: 2 })}
-            placeholder="Your Name"
-          />
-          {errors.name && <p className="error-message">{errors.name.message}</p>}
+    <Box 
+      display="flex" 
+      justifyContent="center" 
+      alignItems="center" 
+      height="100vh" 
+      bgcolor="#f5f5f5"
+    >
+      <Box 
+        bgcolor="white" 
+        padding={3} 
+        borderRadius={2} 
+        boxShadow={2} 
+        maxWidth="400px" 
+        width="100%"
+      >
+        <Typography variant="h4" align="center" gutterBottom>
+          Sign Up! 👋
+        </Typography>
+        <Typography variant="body1" align="center" gutterBottom>
+          Create your account by filling in the details below.
+        </Typography>
 
-          <label>Email</label>
-          <input
-            {...register('email', { required: 'Email is required', pattern: /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/ })}
-            placeholder="example@gmail.com"
+        <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column' }}>
+          <TextField
+            label="Name"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            {...register('name', { required: 'Name is required', minLength: { value: 2, message: 'Name must be at least 2 characters' } })}
+            error={!!errors.name}
+            helperText={errors.name ? errors.name.message : ''}
           />
-          {errors.email && <p className="error-message">{errors.email.message}</p>}
 
-          <label>Password</label>
-          <input
+          <TextField
+            label="Email"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            {...register('email', { 
+              required: 'Email is required', 
+              pattern: { 
+                value: /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/, 
+                message: 'Invalid email address'
+              } 
+            })}
+            error={!!errors.email}
+            helperText={errors.email ? errors.email.message : ''}
+          />
+
+          <TextField
+            label="Password"
             type="password"
-            {...register('password', { required: 'Password is required', minLength: 8 })}
-            placeholder="Password"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            {...register('password', { required: 'Password is required', minLength: { value: 8, message: 'Password must be at least 8 characters' } })}
+            error={!!errors.password}
+            helperText={errors.password ? errors.password.message : ''}
           />
-          {errors.password && <p className="error-message">{errors.password.message}</p>}
-          
-          <button type="submit" className="btn btn-signup">Sign Up</button>
+
+          <Button 
+            type="submit" 
+            variant="contained" 
+            color="primary" 
+            fullWidth 
+            sx={{ marginTop: 2 }}
+          >
+            Sign Up
+          </Button>
         </form>
 
-        {errorMessage && <p className="error-message">{errorMessage}</p>}
-        {successMessage && <p className="success-message">{successMessage}</p>}
+        {errorMessage && <Alert severity="error" sx={{ marginTop: 2 }}>{errorMessage}</Alert>}
+        {successMessage && <Alert severity="success" sx={{ marginTop: 2 }}>{successMessage}</Alert>}
 
-        <p>Already have an account? <a href="/login">Log In</a></p>
-      </div>
-    </div>
+        <Typography variant="body2" align="center" sx={{ marginTop: 2 }}>
+          Already have an account? <Link href="/login">Log In</Link>
+        </Typography>
+      </Box>
+    </Box>
   );
 };
 

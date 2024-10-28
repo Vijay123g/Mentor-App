@@ -36,3 +36,19 @@
     transform: rotate(360deg);
   }
 }
+
+:root {
+  --sidebar-background: #3f51b5;
+  --sidebar-foreground: #ffffff;
+  --sidebar-hover: #536dfe;
+}
+
+.MuiDrawer-paper {
+  background-color: var(--sidebar-background) !important;
+  color: var(--sidebar-foreground) !important;
+  width: 250px;
+}
+
+.MuiListItemButton-root:hover {
+  background-color: var(--sidebar-hover) !important;
+}

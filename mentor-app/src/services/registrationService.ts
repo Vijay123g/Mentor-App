@@ -23,6 +23,11 @@ const registrationService = {
     return response.data;
   },
 
+  getDetailedRegistrationsByStudent: async (studentId: string) => {
+    const response = await axios.get(`${baseUrl}/registration/detailed-registrations/student/${studentId}`);
+    return response.data;
+  },
+  
   unregisterStudent: async (registrationId: number) => {
     const response = await axios.delete(`${baseUrl}/unregister/${registrationId}`);
     return response.data;
