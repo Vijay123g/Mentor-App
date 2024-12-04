@@ -10,10 +10,16 @@ const AssignCourses: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const faculties = await courseService.getFacultyDetails();
-      setFacultyList(faculties);
-      const courses = await courseService.getCourses();
-      setCoursesList(courses);
+      try {
+        const faculties = await courseService.getFacultyDetails();
+        setFacultyList(faculties);
+        console.log("Faculty List:", faculties); 
+        const courses = await courseService.getCourses();
+        setCoursesList(courses);
+        console.log("Courses List:", courses);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
     };
     fetchData();
   }, []);
@@ -24,7 +30,7 @@ const AssignCourses: React.FC = () => {
       alert('Course assigned successfully!');
       setValue('courseId', '');
       setValue('facultyId', '');
-    } catch {
+    } catch (error) {
       alert('Failed to assign course. Please try again.');
     }
   };
@@ -34,28 +40,54 @@ const AssignCourses: React.FC = () => {
       <Paper elevation={3} sx={{ p: 4, mt: 5 }}>
         <Typography variant="h5" gutterBottom>Assign Courses to Faculty</Typography>
         <form onSubmit={handleSubmit(onSubmit)}>
+          {}
           <FormControl fullWidth sx={{ mb: 2 }}>
             <InputLabel>Select Course</InputLabel>
-            <Select {...register('courseId', { required: 'Course is required' })} error={!!errors.courseId}>
+            <Select 
+              {...register('courseId', { required: 'Course is required' })} 
+              error={!!errors.courseId}
+              defaultValue="" 
+            >
               <MenuItem value=""><em>None</em></MenuItem>
-              {coursesList.map((course) => (
-                <MenuItem key={course.id} value={course.id}>{course.title}</MenuItem>
-              ))}
+              {coursesList.length > 0 ? (
+  coursesList.map((course) => (
+    <MenuItem key={course._id} value={course._id}>
+      {course.courseName}
+    </MenuItem>
+  ))
+) : (
+  <MenuItem value="">No Courses Available</MenuItem>
+)}
+
             </Select>
-            {errors.courseId && <Typography color="error">{(errors.courseId as any).message}</Typography>}
+            {errors.courseId && (
+              <Typography color="error">{String(errors.courseId.message)}</Typography>
+            )}
           </FormControl>
 
+          {}
           <FormControl fullWidth sx={{ mb: 2 }}>
             <InputLabel>Select Faculty</InputLabel>
-            <Select {...register('facultyId', { required: 'Faculty is required' })} error={!!errors.facultyId}>
+            <Select 
+              {...register('facultyId', { required: 'Faculty is required' })} 
+              error={!!errors.facultyId}
+              defaultValue="" 
+            >
               <MenuItem value=""><em>None</em></MenuItem>
-              {facultyList.map((faculty) => (
-                <MenuItem key={faculty.user_id} value={faculty.user_id}>{faculty.name}</MenuItem>
-              ))}
+              {facultyList.length > 0 ? (
+                facultyList.map((faculty) => (
+                  <MenuItem key={faculty._id} value={faculty._id}>{faculty.name}</MenuItem>
+                ))
+              ) : (
+                <MenuItem value="">No Faculty Available</MenuItem>
+              )}
             </Select>
-            {errors.facultyId && <Typography color="error">{(errors.facultyId as any).message}</Typography>}
+            {errors.facultyId && (
+              <Typography color="error">{String(errors.facultyId.message)}</Typography>
+            )}
           </FormControl>
 
+          {}
           <Button type="submit" variant="contained" color="primary" fullWidth>
             Assign Course
           </Button>

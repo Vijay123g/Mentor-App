@@ -1,6 +1,6 @@
 {
     "host" : "localhost",
     "user": "root",
-    "database" : "mentor",
+    "database" : "mentorapp",
     "password" : "Vijay123$" 
 }

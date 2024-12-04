@@ -1,73 +1,83 @@
-import React, { useState, useEffect } from 'react';
-import questionService from '../../services/questionService';
+import React, { useEffect, useState } from 'react';
+import { Container, Paper, Typography, Table, TableHead, TableRow, TableCell, TableBody, FormControl, Select, MenuItem, InputLabel } from '@mui/material';
 import courseService from '../../services/courseService';
-import '../../styles/facultyDashboard.css';
+import questionService from '../../services/questionService';
 
 const ViewQuestions: React.FC = () => {
-  const [questionsList, setQuestionsList] = useState<any[]>([]);
-  const [coursesList, setCoursesList] = useState<any[]>([]);
-  const [selectedCourseTitle, setSelectedCourseTitle] = useState<string | null>(null);
-  const facultyId = localStorage.getItem('userId') || '';
+  const [questions, setQuestions] = useState<any[]>([]); 
+  const [courses, setCourses] = useState<any[]>([]); 
+  const [selectedCourse, setSelectedCourse] = useState<number | string>(''); 
 
   useEffect(() => {
-    loadCourses();
-  }, [facultyId]);
+    const facultyId = localStorage.getItem('userId') || '';
+    const fetchCourses = async () => {
+      try {
+        const fetchedCourses = await courseService.getFacultyCourseList(facultyId);
+        setCourses(fetchedCourses?.courses || []); 
+      } catch (error) {
+        console.error('Error fetching courses:', error);
+        setCourses([]);
+      }
+    };
+    fetchCourses();
+  }, []);
 
-  const loadCourses = () => {
-    courseService.getFacultyCourseList(facultyId).then((response: any) => {
-      setCoursesList(response);
-    }).catch((error: any) => {
-      console.error('Error fetching courses:', error);
-    });
-  };
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      if (!selectedCourse) return; 
 
-  const handleCourseSelect = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const courseId = Number(event.target.value);
-    const selectedCourse = coursesList.find(course => course.id === courseId);
-    setSelectedCourseTitle(selectedCourse ? selectedCourse.title : 'Selected Course');
-    loadQuestionsByCourse(courseId);
-  };
-
-  const loadQuestionsByCourse = (courseId: number) => {
-    questionService.getQuestionsByFaculty(courseId, facultyId).then((response: any) => {
-      setQuestionsList(response.questions);
-    }).catch((error: any) => {
-      console.error('Error fetching questions for the course:', error);
-    });
-  };
+      try {
+        const facultyId = localStorage.getItem('userId') || '';
+        const fetchedQuestions = await questionService.getQuestionsByFaculty(facultyId, selectedCourse);
+        setQuestions(fetchedQuestions || []); 
+      } catch (error) {
+        console.error('Error fetching questions:', error);
+        setQuestions([]); 
+      }
+    };
+    fetchQuestions();
+  }, [selectedCourse]);
 
   return (
-    <div className="faculty-view-questions-container">
-      <h2>Your Questions</h2>
+    <Container maxWidth="lg">
+      <Paper elevation={3} sx={{ p: 4, mt: 5 }}>
+        <Typography variant="h5" gutterBottom>View Questions</Typography>
 
-      <div className="form-field">
-        <label htmlFor="course-select">Select Course</label>
-        <select id="course-select" onChange={handleCourseSelect}>
-          <option value="">Select a course</option>
-          {coursesList.map(course => (
-            <option key={course.id} value={course.id}>
-              {course.title}
-            </option>
-          ))}
-        </select>
-      </div>
+        <FormControl fullWidth sx={{ mb: 2 }}>
+            <InputLabel>Course</InputLabel>
+            <Select
+              value={selectedCourse || ''}
+              onChange={(e) => setSelectedCourse(e.target.value)}
+              label="Course"
+            >
+              {courses.map(course => (
+                <MenuItem key={course.courseId._id} value={course.courseId._id}>
+                  {course.courseId.courseName}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
 
-      {selectedCourseTitle && <h3>Questions for {selectedCourseTitle}</h3>}
-
-      {questionsList.length === 0 ? (
-        <div className="no-questions">
-          <p>No questions found for this course.</p>
-        </div>
-      ) : (
-        <ul className="questions-list">
-          {questionsList.map((question, index) => (
-            <li key={index} className="question-item">
-              {question.question_text}
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+        {questions.length > 0 ? (
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Question</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {questions.map((question: any) => (
+                <TableRow key={question._id}>
+                  <TableCell>{question.questionText}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        ) : (
+          <Typography>No questions available for the selected course.</Typography>
+        )}
+      </Paper>
+    </Container>
   );
 };
 

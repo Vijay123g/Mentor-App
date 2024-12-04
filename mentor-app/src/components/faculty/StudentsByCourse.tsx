@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import facultyService from '../../services/facultyService';
-import { Card, CardContent, Typography, List, ListItem, ListItemText } from '@mui/material';
+import { Card, CardContent, Typography, List, ListItem, ListItemText, Box } from '@mui/material';
 
 interface Student {
   name: string;
-  title : string;
+  title: string;
 }
 
 interface CourseWithStudents {
@@ -50,7 +50,8 @@ const StudentsByCourse: React.FC = () => {
   }
 
   return (
-    <div>
+    <Box sx={{ width: '100%', padding: 2 }}>
+      <Typography variant="h4" gutterBottom>Students Overview</Typography>
       {coursesWithStudents.map(course => (
         <Card key={course.courseTitle} sx={{ marginBottom: '16px' }}>
           <CardContent>
@@ -65,7 +66,7 @@ const StudentsByCourse: React.FC = () => {
           </CardContent>
         </Card>
       ))}
-    </div>
+    </Box>
   );
 };
 

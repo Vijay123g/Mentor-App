@@ -1,165 +1,173 @@
-const Course = require('../models/admin');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 const { validationResult } = require('express-validator');
+const User = require('../models/admin');
+const transporter = require('../middleware/transporter'); 
 
-exports.createCourse = async (req, res, next) => {
 
+exports.signup = async (req, res, next) => {
     const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(422).json({ errors: errors.array() });
-    }
+    if (!errors.isEmpty()) return res.status(422).json({ errors: errors.array() });
 
-    const { title, description, facultyId } = req.body;
+    const { name, email, password, mobile, roles } = req.body;
 
     try {
-        const courseDetails = { title, description, facultyId };
-        const result = await Course.save(courseDetails);
-
-        if (result) {
-            res.status(201).json({ message: 'Course created successfully' });
-        } else {
-            res.status(500).json({ message: 'Failed to create course' });
-        }
-    } catch (err) {
-        next(err);
-    }
-};
-
-exports.assignFaculty = async (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(422).json({ errors: errors.array() });
-    }
-
-    const { courseId, facultyId } = req.body;
-
-    try {
-        const facultyName = await Course.assignFaculty(courseId, facultyId);
-
-        if (facultyName) {
-            res.status(200).json({ message: `Faculty ${facultyName} assigned to course successfully!` });
-        } else {
-            res.status(404).json({ message: 'Course or Faculty not found.' });
-        }
-    } catch (err) {
-        next(err);
-    }
-};
-
-exports.deleteCourse = async (req, res, next) => {
-    const courseId = req.params.courseId;
-
-    try {
-        const result = await Course.delete(courseId);
-
-        if (result) {
-            res.status(200).json({ message: 'Course deleted successfully' });
-        } else {
-            res.status(404).json({ message: 'Course not found' });
-        }
-    } catch (err) {
-        next(err);
-    }
-};
-  
-  exports.getCourses = async (req, res, next) => {
-    try {
-      const courses = await Course.getAllCourses();
-      res.status(200).json(courses);
-    } catch (err) {
-      if (!err.statusCode) err.statusCode = 500;
-      next(err);
-    }
-  };
-
-  exports.getFacultyCourses = async (req, res, next) => {
-    const facultyId = req.params.facultyId; 
-
-    try {
-        const courses = await Course.getFacultyCourses(facultyId); 
-
-        if (courses.length === 0) {
-            return res.status(404).json({ message: 'No courses found for this faculty.' });
-        }
-
-        res.status(200).json(courses);
-    } catch (err) {
-        console.error('Error fetching faculty courses:', err);
-        next(err);
-    }
-
-
-};
-
-exports.getStudentCourses = async (req, res, next) => {
-    const studentId = req.params.studentId; 
-
-    try {
-        console.log('studentID',studentId);
-        const courses= await Course.getRegisteredCoursesByStudent(studentId); 
-
-        if (!Array.isArray(courses) || courses.length === 0) {
-            return res.status(404).json({ message: 'No registered courses found for this student.' });
-        }
-
-        res.status(200).json(courses); 
-    } catch (err) {
-        console.error('Error fetching registered courses:', err);
-        next(err);
-    }
-};
-
-exports.getAllAssignedCourses = async (req, res, next) => {
-    try {
-      const courses = await Course.getAssignedCourses();
-  
-      if (courses.length === 0) {
-        return res.status(404).json({ message: 'No assigned courses found.' });
-      }
-  
-      res.status(200).json(courses);
-    } catch (err) {
-      console.error('Error fetching assigned courses:', err);
-      next(err);
-    }
-  };
-  
-  exports.getCounts = async (req, res, next) => {
-    try {
-        const [studentCountResult] = await Course.countStudent();
-        const [facultyCountResult] = await Course.countFaculty();
-        const [coursesCountResult] = await Course.countCourses();
-
-        const studentCount = studentCountResult.studentCount || 0;
-        const facultyCount = facultyCountResult.facultyCount || 0;
-        const coursesCount = facultyCountResult.facultyCount || 0;
-
-        res.status(200).json({
-            studentCount,
-            facultyCount,
-            coursesCount,
-        });
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const user = await User.save({ name, email, password: hashedPassword,mobile, roles });
+        
+        res.status(201).json({ message: 'User registered successfully', userId: user.insertId });
     } catch (error) {
-        console.error('Error fetching counts:', error);
-        res.status(500).json({ error: { message: error.message } });
+        next(error);
+    }
+};
+
+// exports.login = async (req, res, next) => {
+//     const { email, password } = req.body;
+
+//     try {
+//         const user = await User.findByEmail(email);
+//         if (!user) return res.status(401).json({ message: 'User not found' });
+
+//         const isMatch = await bcrypt.compare(password, user.password);
+//         if (!isMatch) return res.status(401).json({ message: 'Incorrect password' });
+
+//         const token = jwt.sign({ userId: user.user_id, roles: user.roles }, 'your_jwt_secret', { expiresIn: '1h' });
+//         res.status(200).json({ token, userId: user.user_id });
+//     } catch (error) {
+//         next(error);
+//     }
+// };
+
+
+exports.login = async (req, res, next) => {
+    const { email, password } = req.body;
+
+    try {
+        const user = await User.findByEmail(email);
+        if (!user) return res.status(401).json({ message: 'User not found' });
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) return res.status(401).json({ message: 'Incorrect password' });
+
+        const token = jwt.sign({ userId: user.user_id, roles: user.roles }, 'your_jwt_secret', { expiresIn: '1h' });
+        res.status(200).json({ token, userId: user.user_id, role: user.roles });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.getUserById = async (req, res, next) => {
+    const { userId } = req.params;
+    try {
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        res.status(200).json(user);
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.updateUser = async (req, res, next) => {
+    const { userId } = req.params;
+    const { name, profile, mobile } = req.body;
+
+    try {
+        const updated = await User.update(userId, { name, profile, mobile });
+        if (!updated) return res.status(404).json({ message: 'User not found' });
+
+        res.status(200).json({ message: 'User updated successfully' });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.deleteUser = async (req, res, next) => {
+    const { userId } = req.params;
+
+    try {
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+        
+        if (user.roles.includes('Admin')) return res.status(403).json({ message: 'Cannot delete admin user' });
+
+        const result = await User.delete(userId);
+        res.status(200).json({ message: 'User deleted successfully' });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.getUsersByRole = async (req, res, next) => {
+    const { roleId } = req.params;
+    try {
+        const users = await User.findByRole(roleId);
+        res.status(200).json(users);
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.getCountByRole = async (req, res, next) => {
+    const { roleId } = req.params;
+    try {
+        const count = await User.countByRole(roleId);
+        res.status(200).json({ count });
+    } catch (error) {
+        next(error);
+    }
+};
+    
+
+exports.generateOtp = async (req, res, next) => {
+    const { email } = req.body;
+
+    try {
+        const otp = Math.floor(100000 + Math.random() * 900000); 
+        await User.saveOtp(email, otp);
+
+        await transporter.sendMail({
+            from: '"Mentor App" <vijay.g.18.04.1999@gmail.com   >', 
+            to: email,
+            subject: 'Your OTP Code',
+            text: `Your OTP code is: ${otp}`,
+        });
+
+        res.status(200).json({ message: 'OTP sent successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to send OTP', error: error.message });
     }
 };
 
 
-exports.getCoursesByFaculty = async (req, res, next) => {
-  const facultyId = req.params.facultyId;
+exports.verifyOtp = async (req, res, next) => {
+    const { email, otp } = req.body;
 
-  try {
-    const courses = await Course.getCoursesByFacultyId(facultyId);
+    try {
+        const savedOTP = await User.findOtpByEmail(email);
 
-    if (!courses.length) {
-      return res.status(404).json({ message: 'No courses found for this faculty.' });
+        if (!savedOTP || parseInt(savedOTP.otp, 10) !== parseInt(otp, 10)) {
+            return res.status(400).json({ message: 'Invalid or expired OTP' });
+        }
+
+        // Delete OTP after successful verification
+        await User.deleteOtp(email);
+
+        const user = await User.findByEmail(email); // Fetch the actual user
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Create JWT token
+        const token = jwt.sign({ userId: user.user_id, roles: user.roles }, 'your_jwt_secret', { expiresIn: '1h' });
+
+        res.status(200).json({ token, userId: user.user_id, role: user.roles });
+    } catch (error) {
+        res.status(500).json({ message: 'OTP verification failed', error: error.message });
     }
-
-    res.status(200).json(courses);
-  } catch (err) {
-    console.error('Error fetching courses by faculty:', err);
-    next(err);
-  }
 };
+
+
 
 

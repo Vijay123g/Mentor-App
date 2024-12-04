@@ -1,28 +1,36 @@
 const express = require('express');
-const { body, param } = require('express-validator');
-const router = express.Router();
+const { body } = require('express-validator');
 const questionController = require('../controller/question');
 
+const router = express.Router();
+
+router.get('/', questionController.getAllQuestions);
+router.get('/:questionId', questionController.getQuestionById);
+
 router.post(
-  '/question',
-  [
-    body('courseId').isInt().withMessage('Course ID is required and must be an integer'),
-    body('facultyId').isInt().withMessage('Faculty ID is required and must be an integer'),
-    body('questionText').notEmpty().withMessage('Question text is required'),
-  ],
-  questionController.createQuestion
+    '/',
+    [
+        body('courseId').isInt().withMessage('Course ID is required'),
+        body('facultyId').isInt().withMessage('Faculty ID is required'),
+        body('questionText').notEmpty().withMessage('Question text is required')
+    ],
+    questionController.createQuestion
 );
 
-router.get('/question/:courseId', questionController.getQuestionsByCourse);
+router.put(
+    '/:questionId',
+    [
+        body('courseId').isInt().withMessage('Course ID is required'),
+        body('facultyId').isInt().withMessage('Faculty ID is required'),
+        body('questionText').notEmpty().withMessage('Question text is required')
+    ],
+    questionController.updateQuestion
+);
 
-router.get('/faculty/:course_id/:faculty_id', questionController.getQuestionsByFaculty);
+router.delete('/:questionId', questionController.deleteQuestion);
 
+router.get('/questions/:facultyId/:courseId', questionController.getQuestionsByFacultyAndCourse);
 
-
-router.get('/test', (req, res, next) => {
-  console.log('Test route hit');
-  res.status(200).json({ message: 'Test route working' });
-});
 
 
 module.exports = router;

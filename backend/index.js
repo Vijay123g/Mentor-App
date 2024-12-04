@@ -1,45 +1,44 @@
-const express = require('express');
-
+const express = require('express');  
 const bodyParser = require('body-parser');
-
-const authRuotes = require('./routes/auth');
-
-const adminRuotes = require('./routes/admin');
-
-const questionRuotes = require('./routes/question');
-
-const answerRuotes = require('./routes/answer');
-
+const mongoose = require('./connection/db');  
+const authRoutes = require('./routes/auth');
+const adminRoutes = require('./routes/admin');
+const questionRoutes = require('./routes/question');
+const assignmentRoutes = require('./routes/assignment');
+const answerRoutes = require('./routes/answer');
+const courseRoute = require('./routes/course');
+const facultyCourse = require('./routes/facultyCourse');
+const assignmentQuestionRoutes = require('./routes/assignmentQuestion');
 const registrationRoutes = require('./routes/registration');
+const errorController = require('./controller/error');
 
 const app = express();
-
-const ports = process.env.PORT || 3000;
-
-const errorController = require('./controller/error');
+const port = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
 
-app.use((req,res,next) => {
-    res.setHeader('Access-Control-Allow-Origin','*');
-    res.setHeader('Access-Control-Allow-Methods','GET, POST,PUT,DELETE,OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers','Content-Type , Authorization');
+app.use((req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     next();
+});
 
-})
+app.use('/auth', authRoutes);
+app.use('/admin', adminRoutes);
+app.use('/question', questionRoutes);
+app.use('/answer', answerRoutes);
+app.use('/registration', registrationRoutes);
+app.use('/course', courseRoute);
+app.use('/facultycourse', facultyCourse);
+app.use('/assignmentRoutes', assignmentRoutes);
+app.use('/assignmentQuestionRoutes', assignmentQuestionRoutes);
 
-app.use('/auth',authRuotes);
-
-app.use('/admin',adminRuotes);
-
-app.use('/question',questionRuotes);
-
-app.use('/answer',answerRuotes);
-
-app.use('/registration',registrationRoutes);
 
 app.use(errorController.get404);
-
 app.use(errorController.get500);
 
-app.listen(ports,() => console.log(`Lising on port ${ports}`))
+
+app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+});

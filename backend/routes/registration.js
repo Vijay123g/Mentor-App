@@ -1,25 +1,27 @@
 const express = require('express');
-const { body, param } = require('express-validator');
-const router = express.Router();
+const { body } = require('express-validator');
 const registrationController = require('../controller/registration');
 
+const router = express.Router();
 
+// Get all registrations
+router.get('/', registrationController.getAllRegistrations);
+
+// Get registrations by student ID
+router.get('/:studentId', registrationController.getRegistrationsByStudentId);
+
+// Create a new registration
 router.post(
-  '/register',
-  [
-    body('studentId').isInt().withMessage('Invalid student ID.'),
-    body('courseId').isInt().withMessage('Invalid course ID.'),
-  ],
-  registrationController.registerStudent
+    '/',
+    [
+        body('studentId').isInt().withMessage('Student ID must be an integer.'),
+        body('courseId').isInt().withMessage('Course ID must be an integer.'), // Use 'courseId' here
+        body('registrationDate').isISO8601().withMessage('Registration date must be a valid date.')
+    ],
+    registrationController.createRegistration
 );
 
-router.get('/registrations/student/:studentId', registrationController.getRegistrationsByStudent);
-
-router.get('/registrations/course/:courseId', registrationController.getRegistrationsByCourse);
-
-router.delete('/unregister/:registrationId', registrationController.unregisterStudent);
-
-router.get(
-  '/detailed-registrations/student/:studentId',registrationController.getDetailedRegistrationsByStudent)
+// Delete a registration
+router.delete('/:registrationId', registrationController.deleteRegistration);
 
 module.exports = router;

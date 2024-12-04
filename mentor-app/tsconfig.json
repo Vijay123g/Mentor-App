@@ -1,16 +1,17 @@
 {
-  "compilerOptions": {
-    "target": "es5",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
-    "allowJs": true,
+ "compilerOptions": {
+  "baseUrl": "src",
+  "paths": {
+    "assets/*": ["assets/*"],
+    "components/*": ["components/*"],
+    "layouts/*": ["layouts/*"]
+  },
+    "allowJs": true, // Already enabled to allow .js files
+    "checkJs": false, // Ensure no type-checking for JavaScript files
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "strict": true,
+    "strict": true, // Keep strict mode for better type safety
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
     "module": "esnext",
@@ -18,9 +19,13 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "lib": ["es2017", "dom"]
   },
   "include": [
-    "src"
+    "src" // Include your source folder
+  ],
+  "exclude": [
+    "node_modules" // Explicitly exclude node_modules
   ]
 }

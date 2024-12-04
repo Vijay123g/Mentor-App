@@ -29,7 +29,13 @@ module.exports = class User {
         console.log("Values after null checks:", name, email, role, password);
       
         try {
-          const [result] = await db.execute('INSERT INTO users (name, email, role, password) VALUES (?,?,?,?)', [name, email, role, password]);
+          const [result] = await db.execute(`INSERT INTO users (name, email, role, password)
+SELECT ?, ?, ?, ?
+WHERE NOT EXISTS (
+    SELECT 1 FROM users 
+    WHERE email = ?
+);
+`, [name, email, role, password]);
           return result.affectedRows > 0;
         } catch (error) {
           console.error('Error saving user:', error);
@@ -75,8 +81,33 @@ module.exports = class User {
       }
     }
 
-    static findByRole(role) {
-      return db.execute('SELECT * FROM users WHERE role = ?', [role]);
+    // static findByRole(role) {
+    //   return db.execute('SELECT * FROM users WHERE role = ?', [role]);
+    // }
+    
+    static async findByRole(roleId) {
+        const [rows] = await db.execute(
+            `SELECT u.user_id, u.name, u.email, u.mobile
+FROM UserRoles ur
+JOIN Users u ON u.user_id = ur.user_id
+WHERE ur.role_id = ?
+AND (u.name LIKE ? OR u.email LIKE ?)
+ORDER BY u.name ASC;
+`,
+            [roleId]
+        );
+        return rows;
     }
-    };
+
+    static async countByRole(roleId) {
+        const [result] = await db.execute(
+            `SELECT COUNT(u.email) as count 
+             FROM UserRoles as ur 
+             JOIN Users as u ON u.user_id = ur.user_id 
+             WHERE ur.role_id = ?`,
+            [roleId]
+        );
+        return result[0].count;
+    }
+};
     

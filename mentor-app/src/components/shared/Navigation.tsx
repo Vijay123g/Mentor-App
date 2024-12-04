@@ -6,6 +6,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { AppBar, Toolbar, IconButton, Typography, Box, Button } from '@mui/material';
+import { Dashboard } from '@mui/icons-material';
 
 const Navigation: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -15,10 +16,12 @@ const Navigation: React.FC = () => {
 
   useEffect(() => {
     const role = localStorage.getItem('role');
+    console.log('Role from localStorage in Navigation:', role); 
     if (role) {
       setIsAuthenticated(true);
       setUserRole(role);
       setDashboardTitle(`${role.charAt(0).toUpperCase() + role.slice(1)} Dashboard`);
+
     }
   }, []);
 
@@ -31,6 +34,8 @@ const Navigation: React.FC = () => {
   };
 
   return (
+    <div className="wrapper"> 
+
     <AppBar position="fixed" color="primary">
       <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -70,7 +75,9 @@ const Navigation: React.FC = () => {
         </Box>
       </Toolbar>
     </AppBar>
+    </div>
   );
 };
 
 export default Navigation;
+   

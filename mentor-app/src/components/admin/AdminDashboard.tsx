@@ -5,6 +5,7 @@ import AssignCourses from './AssignCourses';
 import CourseDetails from './ViewCourseDetails';
 import ViewFacultyDetails from './ViewFacultyDetails';
 import AppSidebar from '../shared/AppSidebar';
+import CreateCourse from './CreateCourse';
 import { Box, Container } from '@mui/material';
 
 const AdminDashboard: React.FC = () => {
@@ -18,6 +19,8 @@ const AdminDashboard: React.FC = () => {
         return <AssignCourses />;
       case 'viewFaculty':
         return <ViewFacultyDetails />;
+      case 'addCourse':
+        return <CreateCourse />;
       case 'viewCourses':
         return <CourseDetails />;
       default:
@@ -26,7 +29,7 @@ const AdminDashboard: React.FC = () => {
   };
 
   return (
-    <Box sx={{ display: 'flex', paddingTop: '64px' }}> 
+    <Box sx={{ display: 'flex', paddingTop: '64px' }}>
       <AppSidebar onSelectComponent={setSelectedComponent} role="admin" />
       <Container sx={{ flexGrow: 1, padding: '24px' }}>
         {renderComponent()}
@@ -35,4 +38,4 @@ const AdminDashboard: React.FC = () => {
   );
 };
 
-export default AdminDashboard;
+export default AdminDashboard;  

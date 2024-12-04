@@ -1,65 +1,88 @@
 import React, { useEffect, useState } from 'react';
-import registrationService from '../../services/registrationService';
-import { Box, Card, CardContent, Typography } from '@mui/material';
+import {
+  Box,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Button,
+} from '@mui/material';
+import answerService from '../../services/answerService';
 
 const ViewResults: React.FC = () => {
-    const [results, setResults] = useState<any[]>([]);
-    const [resultMessage, setResultMessage] = useState('');
+  const [answers, setAnswers] = useState<any[]>([]);
 
-    useEffect(() => {
-        const studentId = localStorage.getItem('userId') || '';
-        
-        registrationService.getDetailedRegistrationsByStudent(studentId)
-            .then(response => {
-                const allResults = response.registrations;           
-                setResults(allResults);
+  useEffect(() => {
+    const studentId = localStorage.getItem('userId') || '';
+    if (!studentId) {
+      console.error('User ID not found in localStorage');
+      return;
+    }
 
-                const passedCount = allResults.filter((registration: any) => registration.validation_status === 1).length;
-                setResultMessage(passedCount > 0 
-                    ? 'You have passed some exams/assignments!' 
-                    : 'Waiting for results or validation.'
-                );
-            })
-            .catch(error => console.error('Error fetching results:', error));
-    }, []);
+    answerService
+      .getAnswersByStudent(studentId)
+      .then((response) => {
+        console.log('Response:', response);
+        setAnswers(response.answers || []);
+      })
+      .catch((error) => console.error('Error fetching answers:', error));
+  }, []);
 
-    const groupedResults = results.reduce((acc: any, result) => {
-        const courseId = result.course_id; 
-        if (!acc[courseId]) {
-            acc[courseId] = { title: result.title, submissions: [] };
-        }
-        acc[courseId].submissions.push(result); 
-        return acc;
-    }, {});
+  const handleDownload = (fileId: string) => {
+    const downloadUrl = `http://localhost:3000/answer/file/${fileId}`;
+    window.open(downloadUrl, '_blank');
+  };
 
-    return (
-        <Box sx={{ padding: 3 }}>
-            <Typography variant="h4">Assignment Results</Typography>
-            <Typography variant="subtitle1" sx={{ marginBottom: 2 }}>{resultMessage}</Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                {Object.keys(groupedResults).map(courseId => (
-                    <Card key={courseId} sx={{ minWidth: 275 }}>
-                        <CardContent>
-                            <Typography variant="h6">Course: {groupedResults[courseId].title}</Typography>
-                            {groupedResults[courseId].submissions.map((submission: any) => (
-                                <Box key={submission.registration_id} sx={{ marginTop: 1 }}>
-                                    <Typography variant="body2">
-                                        <strong>Question:</strong> {submission.question_text}
-                                    </Typography>
-                                    <Typography variant="body2">
-                                        <strong>Validation Status:</strong> {submission.validation_status === 1 ? 'Passed' : 'Pending'}
-                                    </Typography>
-                                    <Typography variant="body2">
-                                        <strong>Answer:</strong> {submission.answer_text}
-                                    </Typography>
-                                </Box>
-                            ))}
-                        </CardContent>
-                    </Card>
-                ))}
-            </Box>
-        </Box>
-    );
+  return (
+    <Box>
+      <Typography variant="h4">View Results</Typography>
+      {answers.length > 0 ? (
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Question</TableCell>
+              <TableCell>Answer</TableCell>
+              <TableCell>Validation Status</TableCell>
+              <TableCell>Score</TableCell>
+              <TableCell>Course</TableCell>
+              <TableCell>Assignment</TableCell>
+              <TableCell>Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {answers.map((answer, index) => (
+              <TableRow key={`${answer._id}-${index}`}>
+                {/* Display questionText */}
+                <TableCell>{answer.questionId?.questionText || 'N/A'}</TableCell>
+                <TableCell>{answer.answerText || 'No answer provided'}</TableCell>
+                <TableCell>{answer.validationStatus ? 'Validated' : 'Pending'}</TableCell>
+                <TableCell>{answer.score || 0}</TableCell>
+                <TableCell>{answer.courseId?.courseName || 'Course Not Available'}</TableCell>
+                <TableCell>{answer.assignmentId?.assignmentName || 'Assignment Not Available'}</TableCell>
+                <TableCell>
+                  {answer.fileId && answer.fileId._id ? (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => handleDownload(answer.fileId._id)}
+                    >
+                      Download
+                    </Button>
+                  ) : (
+                    <Typography>No file available</Typography>
+                  )}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      ) : (
+        <Typography>No results available.</Typography>
+      )}
+    </Box>
+  );
 };
 
 export default ViewResults;

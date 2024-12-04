@@ -8,13 +8,18 @@ const registrationService = {
     return response.data;
   },
 
-  registerCourse: async (studentId: string, courseId: number) => {
-    const response = await axios.post(`${baseUrl}/registration/register`, { studentId, courseId });
+  registerCourse: async (studentId: string, facultyCourseId: string, registrationDate: string) => {
+    const response = await axios.post(`${baseUrl}/registration`, { studentId, facultyCourseId, registrationDate });
+    return response.data;
+  },
+
+  dropCourse: async (registrationId: number) => {
+    const response = await axios.delete(`${baseUrl}/registration/${registrationId}`);
     return response.data;
   },
 
   getRegistrationsByStudent: async (studentId: string) => {
-    const response = await axios.get(`${baseUrl}/registrations/student/${studentId}`);
+    const response = await axios.get(`${baseUrl}/registration/${studentId}`);
     return response.data;
   },
 
@@ -24,14 +29,14 @@ const registrationService = {
   },
 
   getDetailedRegistrationsByStudent: async (studentId: string) => {
-    const response = await axios.get(`${baseUrl}/registration/detailed-registrations/student/${studentId}`);
+    const response = await axios.get(`${baseUrl}/registration/${studentId}`);
     return response.data;
   },
-  
+
   unregisterStudent: async (registrationId: number) => {
     const response = await axios.delete(`${baseUrl}/unregister/${registrationId}`);
     return response.data;
-  }
+  },
 };
 
 export default registrationService;

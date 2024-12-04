@@ -1,42 +1,72 @@
-const { validationResult } = require('express-validator');
 const Question = require('../models/question');
+const { validationResult } = require('express-validator');
+
+exports.getAllQuestions = async (req, res, next) => {
+    try {
+        const [questions] = await Question.getAll();
+        res.status(200).json({ questions });
+    } catch (err) {
+        if (!err.statusCode) err.statusCode = 500;
+        next(err);
+    }
+};
+
+exports.getQuestionById = async (req, res, next) => {
+    const questionId = req.params.questionId;
+    try {
+        const [question] = await Question.getById(questionId);
+        res.status(200).json({ question });
+    } catch (err) {
+        if (!err.statusCode) err.statusCode = 500;
+        next(err);
+    }
+};
 
 exports.createQuestion = async (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) return res.status(422).json({ errors: errors.array() });
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(422).json({ errors: errors.array() });
 
-  const { courseId, facultyId, questionText } = req.body;
+    const { courseId, facultyId, questionText } = req.body;
 
-  try {
-    const result = await Question.createQuestion({ courseId, facultyId, questionText });
-    res.status(201).json({ message: 'Question created successfully!' });
-  } catch (err) {
-    if (!err.statusCode) err.statusCode = 500;
-    next(err);
-  }
+    try {
+        await Question.create({ courseId, facultyId, questionText });
+        res.status(201).json({ message: 'Question created successfully!' });
+    } catch (err) {
+        if (!err.statusCode) err.statusCode = 500;
+        next(err);
+    }
 };
 
-exports.getQuestionsByCourse = async (req, res, next) => {
-  const courseId = req.params.courseId;
+exports.updateQuestion = async (req, res, next) => {
+    const questionId = req.params.questionId;
+    const { courseId, facultyId, questionText } = req.body;
 
-  try {
-    const questions = await Question.getQuestionsByCourse(courseId);
-    res.status(200).json({ questions });
-  } catch (err) {
-    if (!err.statusCode) err.statusCode = 500;
-    next(err);
-  }
+    try {
+        await Question.update(questionId, { courseId, facultyId, questionText });
+        res.status(200).json({ message: 'Question updated successfully!' });
+    } catch (err) {
+        if (!err.statusCode) err.statusCode = 500;
+        next(err);
+    }
 };
 
-exports.getQuestionsByFaculty = async (req, res, next) => {
-  const facultyId = req.params.faculty_id ;
-  const course_id =req.params.course_id;
+exports.deleteQuestion = async (req, res, next) => {
+    const questionId = req.params.questionId;
+    try {
+        await Question.delete(questionId);
+        res.status(200).json({ message: 'Question deleted successfully!' });
+    } catch (err) {
+        if (!err.statusCode) err.statusCode = 500;
+        next(err);
+    }
+};
 
-  try {
-    const questions = await Question.getQuestionsByFaculty(course_id,facultyId );
-    res.status(200).json({ questions });
-  } catch (err) {
-    if (!err.statusCode) err.statusCode = 500;
-    next(err);
-  }
+exports.getQuestionsByFacultyAndCourse = async (req, res) => {
+    const { facultyId, courseId } = req.params;
+    try {
+        const [questions] = await Question.getQuestionsByFacultyAndCourse(facultyId, courseId);
+        res.json({ questions });
+    } catch (error) {
+        res.status(500).json({ error: 'Error retrieving questions for faculty and course' });
+    }
 };

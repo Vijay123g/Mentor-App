@@ -1,33 +1,45 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import { Container, Paper, Typography, TextField, Button } from '@mui/material';
-import authService from "../../services/AuthService";
+import { Container, Paper, Typography, TextField, Button, FormControlLabel, Checkbox, FormGroup } from '@mui/material';
+import authService from '../../services/AuthService';
 import { AxiosError } from 'axios';
 
 const AddFaculty: React.FC = () => {
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const { register, handleSubmit, formState: { errors }, reset } = useForm();  
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
+  const [roles, setRoles] = React.useState<string[]>([]);
 
   const onSubmit = async (data: any) => {
-    const formData = { ...data, role: 'Faculty' };
+    const formData = { ...data, roles };
     setErrorMessage(null);
 
     try {
-        await authService.createFaculty(data);
-        alert('Faculty added successfully!');
+      await authService.createFaculty(formData);
+      alert('Faculty added successfully!');
+      reset();
+      setRoles([]);
     } catch (error: unknown) {
-        if (isAxiosError(error) && error.response) {
-            setErrorMessage(error.response.status === 422 
-                ? 'Failed to add faculty. Please check the input.'
-                : 'Something went wrong. Please try again later.');
-        } else {
-            setErrorMessage('Something went wrong. Please try again later.');
-        }
+      if (isAxiosError(error) && error.response) {
+        setErrorMessage(error.response.status === 422 
+          ? 'Failed to add faculty. Please check the input.'
+          : 'Something went wrong. Please try again later.');
+      } else {
+        setErrorMessage('Something went wrong. Please try again later.');
+      }
     }
   };
 
   const isAxiosError = (error: unknown): error is AxiosError => {
     return (error as AxiosError).isAxiosError !== undefined;
+  };
+
+  const handleRoleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedRole = event.target.value;
+    setRoles((prevRoles) =>
+      prevRoles.includes(selectedRole)
+        ? prevRoles.filter((role) => role !== selectedRole)
+        : [...prevRoles, selectedRole]
+    );
   };
 
   return (
@@ -64,6 +76,26 @@ const AddFaculty: React.FC = () => {
             helperText={(errors.password as any)?.message} 
             sx={{ mb: 2 }}
           />
+          <TextField 
+            fullWidth 
+            label="Mobile Number" 
+            {...register('mobile')} 
+            error={!!errors.mobile} 
+            helperText="Optional"
+            sx={{ mb: 2 }}
+          />
+          
+          <FormGroup row sx={{ mb: 2 }}>
+            <FormControlLabel
+              control={<Checkbox value="faculty" checked={roles.includes('faculty')} onChange={handleRoleChange} />}
+              label="Faculty"
+            />
+            <FormControlLabel
+              control={<Checkbox value="admin" checked={roles.includes('admin')} onChange={handleRoleChange} />}
+              label="Admin"
+            />
+          </FormGroup>
+
           <Button type="submit" variant="contained" color="primary" fullWidth>
             Add Faculty
           </Button>

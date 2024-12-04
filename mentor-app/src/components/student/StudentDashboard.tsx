@@ -1,36 +1,40 @@
 import React, { useState } from 'react';
+import AppSidebar from '../shared/AppSidebar';
 import RegisterCourse from './RegisterCourse';
+import ViewAssignments from './AttemptExam';
 import AttemptExam from './AttemptExam';
 import ViewResults from './ViewResults';
-import AppSidebar from '../shared/AppSidebar';
-import HomeDashboard from './HomeDashboard';
-import { Box, Container, Typography } from '@mui/material';
 
-const StudentDashboard: React.FC = () => {
-  const [selectedComponent, setSelectedComponent] = useState<string>('default');
+const StudentDashboard = () => {
+  const [selectedComponent, setSelectedComponent] = useState('Home');
 
   const renderComponent = () => {
+    console.log('Rendering component:', selectedComponent);
     switch (selectedComponent) {
-      case 'home':
-        return <HomeDashboard/>;
-      case 'registerCourse':
+      case 'register-course':
         return <RegisterCourse />;
-      case 'attemptExam':
-        return <AttemptExam />;
-      case 'viewResults':
-        return <ViewResults />;
+      case 'attempt-exam':
+        return <AttemptExam/>;
+      case 'view-results':
+         return <ViewResults/>
       default:
-        return <HomeDashboard/>
+        return <RegisterCourse />;
     }
   };
 
   return (
-    <Box sx={{ display: 'flex' }}>
-      <AppSidebar onSelectComponent={setSelectedComponent} role="student" />
-      <Container sx={{ flexGrow: 1, paddingTop: '50px' }}>
+    <div style={{ display: 'flex' }}>
+      <AppSidebar
+        role="student"
+        onSelectComponent={(component) => {
+          console.log('Selected Component:', component);
+          setSelectedComponent(component);
+        }}
+      />
+      <div style={{ flex: 1, padding: '20px' }}>
         {renderComponent()}
-      </Container>
-    </Box>
+      </div>
+    </div>
   );
 };
 

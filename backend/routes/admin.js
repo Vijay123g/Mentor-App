@@ -1,125 +1,33 @@
 const express = require('express');
-const { body, param } = require('express-validator');
-const router = express.Router();
-const authController = require('../controller/auth');
-
+const { check } = require('express-validator');
 const adminController = require('../controller/admin');
-const Course = require('../models/admin');
-const User = require('../models/user');
+const authMiddleware = require('../middleware/auth');
 
-router.post(
-  '/course',
-  [
-    body('title').trim().not().isEmpty().withMessage('Course title is required'),
-    body('description').trim(),
-    body('facultyId').custom(async (facultyId) => {
-        const user = await User.findById(facultyId);
-      
-        if (!user || user[0].length === 0) {
-          console.log('User not found with ID:', facultyId);
-          return Promise.reject('Invalid faculty ID.');
-        }
-      
-        const userData = user[0][0];
-      
-        if (userData.role !== 'Faculty') {
-          return Promise.reject('The user is not a faculty member.');
-        }
-      }),
-      
-  ],
-  adminController.createCourse
-);
+const router = express.Router();
 
-router.post(
-  '/course/assign',
-  [
-    body('courseId').custom(async (courseId) => {
-      const course = await Course.findById(courseId);
-      if (!course) {
-        return Promise.reject('Course not found');
-      }
-    }),
-    body('facultyId').custom(async (facultyId) => {
-        const user = await User.findById(facultyId);
-      
-        if (!user || user[0].length === 0) {
-          return Promise.reject('Invalid faculty ID.');
-        }
-      
-        const userData = user[0][0]; 
-      
-        if (userData.role !== 'Faculty') {
-          return Promise.reject('The user is not a faculty member.');
-        }
-      }),
-      
-  ],
-  adminController.assignFaculty
-);
+// Signup
+router.post('/signup', [
+    check('name').notEmpty(),
+    check('email').isEmail(),
+    check('password').isLength({ min: 6 }),
+], adminController.signup);
 
-router.delete(
-  '/course/:courseId',
-  [
-    param('courseId').custom(async (courseId) => {
-      const course = await Course.findById(courseId);
-      if (!course) {
-        return Promise.reject('Course not found');
-      }
-    }),
-  ],
-  adminController.deleteCourse
-);
+// Login
+router.post('/login', adminController.login);
 
-router.post(
-    '/signup',
-    [
-        body('name').trim().not().isEmpty(),
-        body('email').isEmail().withMessage('Please enter a valid email address!')
-        .custom(async (email) => {
-            const user = await User.find(email);
-            if (user[0].length > 0) {
-                return Promise.reject('Email address already exists!');
-            }
-        })
-        .normalizeEmail(),
-        body('password').trim().isLength({ min: 8 }),
-    ],
-    authController.signup
-);
+// Get user by ID with authorization check
+// router.get('/user/:userId', authMiddleware, adminController.getUserById);
 
-router.post(
-    '/create-faculty',
-    [
-        body('name').trim().not().isEmpty(),
-        body('email').isEmail().withMessage('Please enter a valid email address!')
-        .custom(async (email) => {
-            const user = await User.find(email);
-            if (user[0].length > 0) {
-                return Promise.reject('Email address already exists!');
-            }
-        })
-        .normalizeEmail(),
-        body('password').trim().isLength({ min: 8 }),
-    ],
-    authController.createFaculty
-);
+router.put('/user/:userId', authMiddleware, adminController.updateUser);
 
-router.get('/faculty-details', authController.getFacultyDetails);
+router.delete('/user/:userId', authMiddleware, adminController.deleteUser);
 
-router.get('/view-course', adminController.getCourses);
+router.get('/users/role/:roleId',adminController.getUsersByRole);
 
-router.post('/login', authController.login);
+router.get('/users/role/:roleId/count', adminController.getCountByRole);
 
-router.get('/faculty-courses/:facultyId', adminController.getFacultyCourses);
-
-router.get('/student-courses/:studentId', adminController.getStudentCourses);
-
-router.get('/assigned-courses', adminController.getAllAssignedCourses);
-
-router.get('/counts', adminController.getCounts);
-
-router.get('/courses/faculty/:facultyId', adminController.getCoursesByFaculty);
+router.post('/send-otp', adminController.generateOtp);
+router.post('/verify-otp', adminController.verifyOtp);
 
 
 

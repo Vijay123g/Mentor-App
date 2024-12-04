@@ -1,48 +1,59 @@
 const db = require('../connection/database');
 
-module.exports = class Question {
-  constructor(courseId, facultyId, questionText) {
-    this.courseId = courseId;
-    this.facultyId = facultyId;
-    this.questionText = questionText;
-  }
-
-  static async createQuestion(question) {
-    const { courseId, facultyId, questionText } = question;
-    try {
-      const [result] = await db.execute(
-        'INSERT INTO Questions (course_id, faculty_id, question_text) VALUES (?, ?, ?)',
-        [courseId, facultyId, questionText]
-      );
-      return result.affectedRows > 0;
-    } catch (error) {
-      console.error('Error creating question:', error);
-      throw error;
+class Question {
+    constructor(courseId, facultyId, questionText) {
+        this.courseId = courseId;
+        this.facultyId = facultyId;
+        this.questionText = questionText;
     }
-  }
 
-  static async getQuestionsByCourse(courseId) {
-    try {
-      const [questions] = await db.execute(
-        'SELECT * FROM questions WHERE course_id = ?',
-        [courseId]
-      );
-      return questions;
-    } catch (error) {
-      throw error;
+    static async getAll() {
+        return db.execute(`SELECT q.*, c.course_name, u.name AS faculty_name 
+FROM Questions q
+JOIN Courses c ON q.course_id = c.course_id
+JOIN Users u ON q.faculty_id = u.user_id`);
     }
-  }
 
-  static async getQuestionsByFaculty(course_id,faculty_id ) {
-    try {
-      const [questions] = await db.execute(
-        'SELECT * FROM Questions WHERE course_id  = ? and faculty_id = ?',
-        [course_id,faculty_id ]
-      );
-      return questions;
-    } catch (error) {
-      console.error('Error fetching questions by faculty:', error);
-      throw error;
+    static async getById(questionId) {
+        return db.execute(`SELECT q.*, c.course_name, u.name AS faculty_name 
+FROM Questions q
+JOIN Courses c ON q.course_id = c.course_id
+JOIN Users u ON q.faculty_id = u.user_id
+WHERE q.question_id = ?`, [questionId]);
     }
-  }
-};
+
+    static async create(question) {
+        const { courseId, facultyId, questionText } = question;
+        return db.execute(
+            'INSERT INTO Questions (course_id, faculty_id, question_text) VALUES (?, ?, ?)',
+            [courseId, facultyId, questionText]
+        );
+    }
+
+    static async update(questionId, questionData) {
+        const { courseId, facultyId, questionText } = questionData;
+        return db.execute(
+            'UPDATE Questions SET course_id = ?, faculty_id = ?, question_text = ? WHERE question_id = ?',
+            [courseId, facultyId, questionText, questionId]
+        );
+    }
+
+    static async delete(questionId) {
+        return db.execute('DELETE FROM Questions WHERE question_id = ?', [questionId]);
+    }
+
+    static async getQuestionsByFacultyAndCourse(facultyId, courseId) {
+        return db.execute(
+            `SELECT q.*, c.course_name, u.name AS faculty_name 
+FROM Questions q
+JOIN Courses c ON q.course_id = c.course_id
+JOIN Users u ON q.faculty_id = u.user_id
+WHERE q.faculty_id = ? AND q.course_id = ?`,
+            [facultyId, courseId]
+        );
+    }
+}
+
+
+
+module.exports = Question;

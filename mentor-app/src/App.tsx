@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import LoginComponent from './components/auth/Login';
 import SignupComponent from './components/auth/Signup';
 import AdminDashboard from './components/admin/AdminDashboard';
@@ -24,10 +25,12 @@ const App: React.FC = () => {
   return (
     <Router>
       <Routes>
+        {/* Authentication Routes */}
         <Route path="/login" element={<LoginComponent />} />
         <Route path="/signup" element={<SignupComponent />} />
 
-        <Route path="/admin/*" element={<AdminGuard requiredRole="Admin" />}>
+        {/* Admin Routes */}
+        <Route path="/admin/*" element={<AdminGuard requiredRole="admin" />}>
           <Route element={<NavigationLayout />}>
             <Route path="" element={<AdminDashboard />} />
             <Route path="add-faculty" element={<AddFaculty />} />
@@ -37,28 +40,29 @@ const App: React.FC = () => {
           </Route>
         </Route>
 
-
-        <Route path="/faculty/*" element={<FacultyGuard requiredRole="Faculty" />}>
+        {/* Faculty Routes */}
+        <Route path="/faculty/*" element={<FacultyGuard requiredRole="faculty" />}>
           <Route element={<NavigationLayout />}>
             <Route path="" element={<FacultyDashboard />} />
             <Route path="viewAssignedCourses" element={<FacultyCourses />} />
             <Route path="addQuestions" element={<AddQuestions />} />
             <Route path="validateAnswers" element={<ValidateAnswers />} />
             <Route path="viewQuestions" element={<ViewQuestions />} />
-            
           </Route>
         </Route>
 
-        <Route path="/student/*" element={<StudentGuard requiredRole="Student" />}>
+        {/* Student Routes */}
+        <Route path="/student/*" element={<StudentGuard requiredRole="student" />}>
           <Route element={<NavigationLayout />}>
             <Route path="" element={<StudentDashboard />} />
-            <Route path="home" element={<HomeDashboard/>} />
+            <Route path="home" element={<HomeDashboard />} />
             <Route path="register-course" element={<RegisterCourse />} />
-            <Route path="attempt-exam" element={<AttemptExam />} />
+            <Route path="attempt-exam" element={<AttemptExam/>} />
             <Route path="view-results" element={<ViewResults />} />
           </Route>
         </Route>
 
+      
         <Route path="/" element={<Navigate to="/login" replace />} />
       </Routes>
     </Router>

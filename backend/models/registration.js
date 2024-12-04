@@ -1,82 +1,123 @@
 const db = require('../connection/database');
 
-module.exports = class Registration {
-  constructor(studentId, courseId) {
-    this.studentId = studentId;
-    this.courseId = courseId;
-  }
-
-  static async save(registration) {
-    const studentId = registration.studentId || null;
-    const courseId = registration.courseId || null;
-
-    try {
-      const [result] = await db.execute(
-        'INSERT INTO Student_Course_Registration (student_id, course_id) VALUES (?, ?)',
-        [studentId, courseId]
-      );
-      return result.affectedRows > 0;
-    } catch (error) {
-      console.error('Error saving registration:', error);
-      throw error;
+class Registration {
+    constructor(studentId, facultyCourseId, registrationDate) {
+        this.studentId = studentId;
+        this.facultyCourseId = facultyCourseId;
+        this.registrationDate = registrationDate;
     }
-  }
 
-  static async findByStudentId(studentId) {
-    try {
-      const [registrations] = await db.execute(
-        'SELECT * FROM Student_Course_Registration WHERE student_id = ?',
-        [studentId]
-      );
-      return registrations;
-    } catch (error) {
-      console.error('Error finding registrations:', error);
-      throw error;
+    // Fetch all registrations
+    static async getAll() {
+        return db.execute(`
+            SELECT r.registration_id, r.student_id, fc.faculty_course_id, 
+                   c.course_name, c.slots_avilable, 
+                   GROUP_CONCAT(DISTINCT u.name SEPARATOR ', ') AS instructor_names
+            FROM Registrations r
+            JOIN facultycourses fc ON r.faculty_course_id = fc.faculty_course_id
+            JOIN Courses c ON fc.course_id = c.course_id
+            JOIN Users u ON fc.faculty_id = u.user_id
+            GROUP BY r.registration_id, r.student_id, fc.faculty_course_id, c.course_name, c.slots_avilable
+        `);
     }
-  }
 
-  static async findByCourseId(courseId) {
-    try {
-      const [registrations] = await db.execute(
-        'SELECT * FROM Student_Course_Registration WHERE course_id = ?',
-        [courseId]
-      );
-      return registrations;
-    } catch (error) {
-      console.error('Error finding registrations:', error);
-      throw error;
-    }
-  }
+    // Fetch registrations by a specific student ID
+    static async getByStudentId(studentId) {
+        return db.execute(`
+           SELECT 
+    r.registration_id, 
+    r.student_id, 
+    fc.faculty_course_id,
+    c.course_name, 
+    c.slots_avilable,
+    GROUP_CONCAT(DISTINCT u.name SEPARATOR ', ') AS instructor_names,
+    GROUP_CONCAT(DISTINCT a.assignment_id SEPARATOR ', ') AS assignment_ids,
+    GROUP_CONCAT(DISTINCT a.assignment_name SEPARATOR ', ') AS assignment_names
+FROM 
+    Registrations r
+JOIN 
+    facultycourses fc ON r.faculty_course_id = fc.faculty_course_id
+JOIN 
+    Courses c ON fc.course_id = c.course_id
+JOIN 
+    Users u ON fc.faculty_id = u.user_id
+LEFT JOIN 
+    assignments a ON a.faculty_id = fc.faculty_id
+WHERE 
+    r.student_id = ?
+GROUP BY 
+    r.registration_id, 
+    r.student_id, 
+    fc.faculty_course_id, 
+    c.course_name, 
+    c.slots_avilable;
 
-  static async delete(registrationId) {
-    try {
-      const [result] = await db.execute(
-        'DELETE FROM Student_Course_Registration WHERE registration_id = ?',
-        [registrationId]
-      );
-      return result.affectedRows > 0;
-    } catch (error) {
-      console.error('Error deleting registration:', error);
-      throw error;
+        `, [studentId]);
     }
-  }
 
-  static async findRegistrationsWithDetailsByStudentId(studentId) {
-    try {
-      const [results] = await db.execute(
-        `SELECT *
-         FROM student_course_registration AS r
-         JOIN users u ON r.student_id = u.user_id
-         JOIN courses c ON c.id = r.course_id
-         LEFT JOIN exam_answers ea ON ea.registration_id = r.registration_id
-          LEFT JOIN questions q ON q.question_id = ea.question_id
-         WHERE r.student_id = ?`,
-        [studentId]
-      );
-      return results;
-    } catch (error) {
-      console.error('Error fetching detailed registrations:', error);
-      throw error;
+    // Create a new registration
+    static async create(registration) {
+        const { studentId, facultyCourseId, registrationDate } = registration;
+
+        // Validate input
+        if (!studentId || !facultyCourseId || !registrationDate) {
+            throw new Error('Missing required fields: studentId, facultyCourseId, or registrationDate');
+        }
+
+        // Check if the course is already registered by the student
+        const [existing] = await db.execute(`
+            SELECT * FROM Registrations WHERE student_id = ? AND faculty_course_id = ?
+        `, [studentId, facultyCourseId]);
+
+        if (existing.length > 0) {
+            throw new Error('Course already registered by the student.');
+        }
+
+        // Insert new registration
+        await db.execute(`
+            INSERT INTO Registrations (student_id, faculty_course_id, registration_date)
+            VALUES (?, ?, ?)
+        `, [studentId, facultyCourseId, registrationDate]);
+
+        // Reduce available slots
+        await db.execute(`
+            UPDATE Courses 
+            JOIN facultycourses fc ON Courses.course_id = fc.course_id 
+            SET Courses.slots_avilable = Courses.slots_avilable - 1 
+            WHERE fc.faculty_course_id = ?
+        `, [facultyCourseId]);
+
+        return { message: 'Registration successful.' };
     }
-  }
-};
+
+    // Delete a registration
+    static async delete(registrationId) {
+        // Fetch the faculty_course_id to update slots correctly
+        const [registration] = await db.execute(`
+            SELECT faculty_course_id FROM Registrations WHERE registration_id = ?
+        `, [registrationId]);
+
+        if (!registration.length) {
+            throw new Error('Registration not found.');
+        }
+
+        const facultyCourseId = registration[0].faculty_course_id;
+
+        // Delete the registration
+        await db.execute(`
+            DELETE FROM Registrations WHERE registration_id = ?
+        `, [registrationId]);
+
+        // Increase available slots
+        await db.execute(`
+            UPDATE Courses 
+            JOIN facultycourses fc ON Courses.course_id = fc.course_id 
+            SET Courses.slots_avilable = Courses.slots_avilable + 1 
+            WHERE fc.faculty_course_id = ?
+        `, [facultyCourseId]);
+
+        return { message: 'Successfully dropped course.' };
+    }
+}
+
+module.exports = Registration;

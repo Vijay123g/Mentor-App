@@ -6,6 +6,7 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/
 
 interface Faculty {
   id: string;
+  _id:string;
   name: string;
   email: string;
   user_id?: string;
@@ -14,29 +15,61 @@ interface Faculty {
   linkedin?: string;
 }
 
+interface Course {
+  course_name: string;
+  semester: number;
+}
+
 const ViewFacultyDetails: React.FC = () => {
   const [facultyList, setFacultyList] = useState<Faculty[]>([]);
+  const [coursesList, setCoursesList] = useState<Course[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [showCourses, setShowCourses] = useState(false);
-  const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
+  const [showCoursesDialog, setShowCoursesDialog] = useState(false);
+  const [selectedCourses, setSelectedCourses] = useState<Course[]>([]);
   const [selectedFacultyName, setSelectedFacultyName] = useState<string>('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const pageSize = 5;
   const totalPages = Math.ceil(facultyList.length / pageSize);
 
   useEffect(() => {
-    courseService.getFacultyDetails().then(response => setFacultyList(response));
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const faculties = await courseService.getFacultyDetails();
+        setFacultyList(Array.isArray(faculties) ? faculties : []);
+        const courses = await courseService.getCourses();
+        setCoursesList(Array.isArray(courses) ? courses : []);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setError("Failed to load data.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
   }, []);
+  const handleFacultyClick = async (facultyId: string, name: string) => {
+    console.log("Faculty ID:", facultyId);
+    setLoading(true);
+    try {
+        const response = await courseService.getFacultyCourseList(facultyId);
+        const courses = response.courses.map((item: any) => ({
+            course_name: item.courseId.courseName,
+            semester: item.courseId.semester,
+        }));
+        setSelectedCourses(courses);
+        setSelectedFacultyName(name);
+        setShowCoursesDialog(true);
+    } catch (error) {
+        console.error("Error fetching assigned courses:", error);
+        setError("Error fetching assigned courses.");
+    } finally {
+        setLoading(false);
+    }
+};
 
-  const handleFacultyClick = (employeeId: string, facultyName: string) => {
-    courseService.getFacultyCourseList(employeeId)
-      .then(response => {
-        setSelectedCourses(response.map((course: { title: string }) => course.title));
-        setSelectedFacultyName(facultyName);
-        setShowCourses(true);
-      })
-      .catch(error => console.error('Error fetching assigned courses:', error));
-  };
 
   const paginatedList = facultyList.slice(
     (currentPage - 1) * pageSize,
@@ -54,12 +87,16 @@ const ViewFacultyDetails: React.FC = () => {
   return (
     <div className="admin-view-faculty-container">
       <h2>Faculty Details</h2>
+
+      {loading && <p>Loading...</p>}
+      {error && <p className="error">{String(error)}</p>}
+
       <div className="faculty-grid">
-        {paginatedList.map(faculty => (
+        {paginatedList.map((faculty) => (
           <div
             className="faculty-card"
             key={faculty.id}
-            onClick={() => handleFacultyClick(faculty.user_id || '', faculty.name)}
+            onClick={() => handleFacultyClick(faculty._id || '', faculty.name)}
           >
             <img
               src={faculty.photo || defaultPhoto}
@@ -69,7 +106,7 @@ const ViewFacultyDetails: React.FC = () => {
             <div className="faculty-details">
               <h3>{faculty.name}</h3>
               <p>Email: {faculty.email}</p>
-              <p>Employee ID: {faculty.user_id || 'Not Available'}</p>
+              <p>Employee ID: {faculty._id || 'Not Available'}</p>
             </div>
           </div>
         ))}
@@ -87,23 +124,28 @@ const ViewFacultyDetails: React.FC = () => {
         </button>
       </div>
 
-      <Dialog open={showCourses} onClose={() => setShowCourses(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Assigned Courses for {selectedFacultyName}</DialogTitle>
-        <DialogContent>
-          <ul>
+      <Dialog open={showCoursesDialog} onClose={() => setShowCoursesDialog(false)} maxWidth="sm" fullWidth>
+    <DialogTitle>Assigned Courses for {selectedFacultyName}</DialogTitle>
+    <DialogContent>
+        <ul>
             {selectedCourses.length > 0 ? (
-              selectedCourses.map((course, index) => (
-                <li key={index}>{course}</li>
-              ))
+                selectedCourses.map((course, index) => (
+                    <li key={index}>
+                        {course.course_name} - Semester {course.semester}
+                    </li>
+                ))
             ) : (
-              <p>No courses assigned.</p>
+                <p>No courses assigned.</p>
             )}
-          </ul>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setShowCourses(false)} color="primary">Close</Button>
-        </DialogActions>
-      </Dialog>
+        </ul>
+    </DialogContent>
+    <DialogActions>
+        <Button onClick={() => setShowCoursesDialog(false)} color="primary">
+            Close
+        </Button>
+    </DialogActions>
+</Dialog>
+
     </div>
   );
 };
